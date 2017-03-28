@@ -24,6 +24,14 @@ namespace Axe.Logging.Test
             Assert.Throws<ArgumentNullException>(() => exception.Mark(doNotCare));
         }
 
+        [Fact]
+        public void shold_throw_argumet_null_exception_when_get_log_entry_from_a_null_exception()
+        {
+            Exception exception = null;
+
+            Assert.Throws<ArgumentNullException>(() => exception.GetLogEntry());
+        }
+
         private static LogEntry CreateLogEntry()
         {
             var time = DateTime.UtcNow;

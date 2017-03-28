@@ -13,12 +13,18 @@ namespace Axe.Logging.Core
             {
                 throw new ArgumentNullException(nameof(exception));
             }
+
             exception.Data.Add(LOG_ENTRY_KEY, logEntry);
             return exception;
         }
 
         public static LogEntry GetLogEntry(this Exception exception)
         {
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
             return exception.Data[LOG_ENTRY_KEY] as LogEntry;
         }
     }
