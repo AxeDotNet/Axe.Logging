@@ -9,6 +9,10 @@ namespace Axe.Logging.Core
 
         public static T Mark<T>(this T exception, LogEntry logEntry) where T : Exception 
         {
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
             exception.Data.Add(LOG_ENTRY_KEY, logEntry);
             return exception;
         }
