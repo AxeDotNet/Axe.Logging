@@ -7,7 +7,7 @@ namespace Axe.Logging.Test
     public class AxeLoggingFacts
     {
         [Fact]
-        public void shold_get_log_entry_form_any_marked_exception()
+        public void should_get_log_entry_form_any_marked_exception()
         {
             LogEntry doNotCare = CreateLogEntry();
             var exception = new Exception().Mark(doNotCare);
@@ -16,7 +16,7 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void shold_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
+        public void should_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
         {
             Exception exception = null;
             LogEntry doNotCare = CreateLogEntry();
@@ -25,11 +25,24 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void shold_throw_argumet_null_exception_when_get_log_entry_from_a_null_exception()
+        public void should_throw_argumet_null_exception_when_get_log_entry_from_a_null_exception()
         {
             Exception exception = null;
 
             Assert.Throws<ArgumentNullException>(() => exception.GetLogEntry());
+        }
+
+        [Fact]
+        public void should_get_unknown_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_with_log_entry()
+        {
+            var exception = new Exception();
+
+            LogEntry logEntry = exception.GetLogEntry();
+
+            Assert.Equal(DateTime.UtcNow, logEntry.Time);
+            Assert.Equal(exception.Message, logEntry.Entry);
+            Assert.Equal(exception, logEntry.Data);
+            Assert.Equal(Level.Unknown, logEntry.Level);
         }
 
         private static LogEntry CreateLogEntry()

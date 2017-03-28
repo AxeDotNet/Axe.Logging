@@ -25,7 +25,12 @@ namespace Axe.Logging.Core
                 throw new ArgumentNullException(nameof(exception));
             }
 
-            return exception.Data[LOG_ENTRY_KEY] as LogEntry;
+            if (exception.Data[LOG_ENTRY_KEY] != null)
+            {
+                return exception.Data[LOG_ENTRY_KEY] as LogEntry;
+            }
+
+            return new LogEntry(DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
         }
     }
 
