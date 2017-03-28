@@ -45,6 +45,16 @@ namespace Axe.Logging.Test
             Assert.Equal(Level.Unknown, logEntry.Level);
         }
 
+        [Fact]
+        public void should_get_log_entry_of_exception_when_log_entry_existed_in_inner_exception()
+        {
+            LogEntry doNotCare = CreateLogEntry();
+            var innerExceptionWithLogEntry = new Exception().Mark(doNotCare);
+            var exception = new Exception("edo not care exception 1", new Exception("do not care exception 2", innerExceptionWithLogEntry));
+
+            Assert.Equal(doNotCare, exception.GetLogEntry());
+        }
+
         private static LogEntry CreateLogEntry()
         {
             var time = DateTime.UtcNow;

@@ -29,7 +29,10 @@ namespace Axe.Logging.Core
             {
                 return exception.Data[LOG_ENTRY_KEY] as LogEntry;
             }
-
+            if (exception.InnerException != null)
+            {
+                return exception.InnerException.GetLogEntry();
+            }
             return new LogEntry(DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
         }
     }
