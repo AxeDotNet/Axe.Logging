@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Axe.Logging.Core
 {
@@ -18,22 +19,42 @@ namespace Axe.Logging.Core
             return exception;
         }
 
-        public static LogEntry GetLogEntry(this Exception exception)
+        public static LogEntry[] GetLogEntry(this Exception exception)
         {
             if (exception == null)
             {
                 throw new ArgumentNullException(nameof(exception));
             }
 
+            List<LogEntry> logEntries = new List<LogEntry>();
+            GetLogEntryFromException(exception, ref logEntries);
+
+            if (logEntries.Count == 0)
+            {
+                var defaultUknownException = CreateDefaultUknownException(exception);
+                logEntries.Add(defaultUknownException);
+            }
+
+            return logEntries.ToArray();
+        }
+
+        private static LogEntry CreateDefaultUknownException(Exception exception)
+        {
+            return new LogEntry(DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
+        }
+
+        [SuppressMessage("ReSharper", "UseNullPropagation")]
+        private static void GetLogEntryFromException(Exception exception, ref List<LogEntry> logEntries)
+        {
             if (exception.Data[LOG_ENTRY_KEY] != null)
             {
-                return exception.Data[LOG_ENTRY_KEY] as LogEntry;
+                logEntries.Add(exception.Data[LOG_ENTRY_KEY] as LogEntry);
             }
+
             if (exception.InnerException != null)
             {
-                return exception.InnerException.GetLogEntry();
+                GetLogEntryFromException(exception.InnerException, ref logEntries);
             }
-            return new LogEntry(DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Axe.Logging.Core;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace Axe.Logging.Test
             LogEntry doNotCare = CreateLogEntry();
             var exception = new Exception().Mark(doNotCare);
 
-            Assert.Equal(doNotCare, exception.GetLogEntry());
+            Assert.Equal(doNotCare, exception.GetLogEntry().Single());
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace Axe.Logging.Test
         {
             var exception = new Exception();
 
-            LogEntry logEntry = exception.GetLogEntry();
+            LogEntry logEntry = exception.GetLogEntry().Single();
 
             Assert.Equal(DateTime.UtcNow, logEntry.Time);
             Assert.Equal(exception.Message, logEntry.Entry);
@@ -46,14 +47,32 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void should_get_log_entry_of_exception_when_log_entry_existed_in_inner_exception()
+        public void should_get_log_entry_of_exception_given_linked_type_exception_and_log_entry_existed_in_inner_exception()
         {
             LogEntry doNotCare = CreateLogEntry();
             var innerExceptionWithLogEntry = new Exception().Mark(doNotCare);
             var exception = new Exception("edo not care exception 1", new Exception("do not care exception 2", innerExceptionWithLogEntry));
 
-            Assert.Equal(doNotCare, exception.GetLogEntry());
+            Assert.Equal(doNotCare, exception.GetLogEntry().Single());
         }
+
+        [Fact]
+        public void should_get_all_log_entries_given_linked_list_type_exception_with_multiple_marked_exceptions()
+        {
+            var id = Guid.NewGuid();
+            LogEntry doNotCare1 = CreateLogEntry();
+            LogEntry doNotCare2 = CreateLogEntry();
+
+            var innerException = new Exception("inner exception").Mark(doNotCare2);
+            var exception = new Exception("exception 1", innerException).Mark(doNotCare1);
+
+            var logEntries = exception.GetLogEntry();
+
+            Assert.Equal(2, logEntries.Length);
+            Assert.Equal(doNotCare1, logEntries[0]);
+            Assert.Equal(doNotCare2, logEntries[1]);
+        }
+
 
         private static LogEntry CreateLogEntry()
         {
