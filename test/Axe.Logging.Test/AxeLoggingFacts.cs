@@ -72,6 +72,23 @@ namespace Axe.Logging.Test
             Assert.Equal(doNotCareLogEntryTwo, logEntries[1]);
         }
 
+        [Fact]
+        public void should_get_all_log_entries_given_aggregate_exception_with_multiple_marked_exceptions()
+        {
+            LogEntry doNotCareLogEntryOne = CreateLogEntry();
+            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
+
+            Exception innerExceptionMarkedOne = new Exception("inner exception one").Mark(doNotCareLogEntryOne);
+            Exception innerExceptionMarkedTwo = new Exception("inner exception two").Mark(doNotCareLogEntryTwo);
+            var exception = new AggregateException("aggregate exceptions", innerExceptionMarkedOne, innerExceptionMarkedTwo);
+
+            LogEntry[] logEntries = exception.GetLogEntry();
+
+            Assert.Equal(2, logEntries.Length);
+            Assert.Equal(doNotCareLogEntryOne, logEntries[0]);
+            Assert.Equal(doNotCareLogEntryTwo, logEntries[1]);
+        }
+
 
         private static LogEntry CreateLogEntry()
         {

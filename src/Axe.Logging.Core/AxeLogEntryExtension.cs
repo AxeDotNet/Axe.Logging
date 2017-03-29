@@ -21,6 +21,7 @@ namespace Axe.Logging.Core
             VerifyException(exception);
 
             var logEntries = new List<LogEntry>();
+
             GetLogEntryFromException(exception,  logEntries);
 
             if (!logEntries.Any())
@@ -52,9 +53,26 @@ namespace Axe.Logging.Core
                 logEntries.Add(exception.Data[LOG_ENTRY_KEY] as LogEntry);
             }
 
-            if (exception.InnerException != null)
+            var aggregateException = exception as AggregateException;
+
+            if (aggregateException == null)
             {
-                GetLogEntryFromException(exception.InnerException, logEntries);
+                if (exception.InnerException != null)
+                {
+                    GetLogEntryFromException(exception.InnerException, logEntries);
+                }
+            }
+            else
+            {
+                List<Exception> innerExceptions = aggregateException.InnerExceptions.ToList();
+                foreach (var ex in innerExceptions)
+                {
+                    if (ex != null)
+                    {
+                        GetLogEntryFromException(ex, logEntries);
+                    }
+
+                }
             }
         }
     }
