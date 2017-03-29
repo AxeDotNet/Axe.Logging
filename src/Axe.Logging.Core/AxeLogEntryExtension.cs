@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Axe.Logging.Core
 {
@@ -22,9 +21,7 @@ namespace Axe.Logging.Core
 
             var logEntries = new List<LogEntry>();
 
-            GetLogEntryFromException(exception,  logEntries);
-
-            if (!logEntries.Any())
+            if (!GetLogEntryFromException(exception,  logEntries))
             {
                 LogEntry defaultUknownException = CreateDefaultUknownException(exception);
                 logEntries.Add(defaultUknownException);
@@ -46,34 +43,36 @@ namespace Axe.Logging.Core
             return new LogEntry(Guid.Empty, DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
         }
 
-        private static void GetLogEntryFromException(Exception exception, List<LogEntry> logEntries)
+        private static bool GetLogEntryFromException(Exception exception, List<LogEntry> logEntries, bool isMarked = false)
         {
             if (exception.Data[LOG_ENTRY_KEY] != null)
             {
                 logEntries.Add(exception.Data[LOG_ENTRY_KEY] as LogEntry);
+                isMarked = true;
             }
 
             var aggregateException = exception as AggregateException;
 
-            if (aggregateException == null)
+            if (aggregateException != null)
             {
-                if (exception.InnerException != null)
-                {
-                    GetLogEntryFromException(exception.InnerException, logEntries);
-                }
-            }
-            else
-            {
-                List<Exception> innerExceptions = aggregateException.InnerExceptions.ToList();
-                foreach (var ex in innerExceptions)
+                var isGetLogEntryFromException = true;
+                foreach (Exception ex in aggregateException.InnerExceptions)
                 {
                     if (ex != null)
                     {
-                        GetLogEntryFromException(ex, logEntries);
+                        if (!GetLogEntryFromException(ex, logEntries)) isGetLogEntryFromException = false;
                     }
 
                 }
+                return isGetLogEntryFromException;
             }
+
+            if (exception.InnerException != null)
+            {
+                return GetLogEntryFromException(exception.InnerException, logEntries, isMarked);
+            }
+
+            return isMarked;
         }
     }
 }
