@@ -15,13 +15,13 @@ namespace Axe.Logging.Core
             return exception;
         }
 
-        public static LogEntry[] GetLogEntry(this Exception exception)
+        public static LogEntry[] GetLogEntry(this Exception exception, int maxLevel = 10)
         {
             VerifyException(exception);
 
             var logEntries = new List<LogEntry>();
 
-            if (!GetLogEntryFromException(exception,  logEntries))
+            if (!GetLogEntryFromException(exception, maxLevel, logEntries))
             {
                 LogEntry defaultUknownException = CreateDefaultUknownException(exception);
                 logEntries.Add(defaultUknownException);
@@ -43,35 +43,37 @@ namespace Axe.Logging.Core
             return new LogEntry(Guid.Empty, DateTime.UtcNow, exception.Message, default(object), exception, Level.Unknown);
         }
 
-        private static bool GetLogEntryFromException(Exception exception, List<LogEntry> logEntries, bool isMarked = false)
+        private static bool GetLogEntryFromException(Exception exception, int maxLevel, List<LogEntry> logEntries, bool isMarked = false, int currentLevel = 1)
         {
-            if (exception.Data[LOG_ENTRY_KEY] != null)
+            if (currentLevel <= maxLevel)
             {
-                logEntries.Add(exception.Data[LOG_ENTRY_KEY] as LogEntry);
-                isMarked = true;
-            }
-
-            var aggregateException = exception as AggregateException;
-
-            if (aggregateException != null)
-            {
-                var isGetLogEntryFromException = true;
-                foreach (Exception ex in aggregateException.InnerExceptions)
+                if (exception.Data[LOG_ENTRY_KEY] != null)
                 {
-                    if (ex != null)
-                    {
-                        if (!GetLogEntryFromException(ex, logEntries)) isGetLogEntryFromException = false;
-                    }
-
+                    logEntries.Add(exception.Data[LOG_ENTRY_KEY] as LogEntry);
+                    isMarked = true;
                 }
-                return isGetLogEntryFromException;
-            }
 
-            if (exception.InnerException != null)
-            {
-                return GetLogEntryFromException(exception.InnerException, logEntries, isMarked);
-            }
+                var aggregateException = exception as AggregateException;
 
+                if (aggregateException != null)
+                {
+                    var isGetLogEntryFromException = true;
+                    foreach (Exception ex in aggregateException.InnerExceptions)
+                    {
+                        if (ex != null)
+                        {
+                            if (!GetLogEntryFromException(ex, maxLevel, logEntries, currentLevel: currentLevel + 1)) isGetLogEntryFromException = false;
+                        }
+
+                    }
+                    return isGetLogEntryFromException;
+                }
+
+                if (exception.InnerException != null)
+                {
+                    return GetLogEntryFromException(exception.InnerException, maxLevel, logEntries, isMarked, currentLevel + 1);
+                }
+            }
             return isMarked;
         }
     }

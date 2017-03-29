@@ -116,6 +116,29 @@ namespace Axe.Logging.Test
             Assert.Equal(Level.Unknown, logEntries[1].Level);
         }
 
+        [Fact]
+        public void should_get_unknown_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_with_log_entry_in_the_maxlevel()
+        {
+            LogEntry doNotCareLogEntry = CreateLogEntry();
+            var exception = new Exception("exception level 1", new Exception("exception level 2").Mark(doNotCareLogEntry));
+
+            Assert.Equal(Level.Unknown, exception.GetLogEntry(1).Single().Level);
+        }
+
+        [Fact]
+        public void should_get_log_entries_with_exceptions_marked_in_the_maxlevel()
+        {
+            LogEntry doNotCareLogEntryOne = CreateLogEntry();
+            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
+
+            Exception innerExceptionOne = new Exception("exception level 1", new Exception("exception level 2")).Mark(doNotCareLogEntryOne);
+            var innerExceptionTwo = new Exception("exception level 1", new Exception("exception level 2", new Exception("exception level 3").Mark(doNotCareLogEntryTwo)));
+            var aggregateException = new AggregateException(innerExceptionOne, innerExceptionTwo);
+
+            Assert.Equal(doNotCareLogEntryOne, aggregateException.GetLogEntry(2)[0]);
+            Assert.Equal(Level.Unknown, aggregateException.GetLogEntry(2)[1].Level);
+        }
+
         private static LogEntry CreateLogEntry()
         {
             var logEntry = new LogEntry(Guid.NewGuid(), DateTime.UtcNow, "This is Entry", new { Id = 1 }, new { Country = "China" }, Level.DefinedByBusiness);
