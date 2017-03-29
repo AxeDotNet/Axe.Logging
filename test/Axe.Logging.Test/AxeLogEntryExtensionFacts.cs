@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Axe.Logging.Test
 {
-    public class AxeLoggingFacts
+    public class AxeLogEntryExtensionFacts
     {
         [Fact]
         public void should_get_log_entry_from_any_marked_exception()
