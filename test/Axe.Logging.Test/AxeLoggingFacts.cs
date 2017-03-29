@@ -89,6 +89,17 @@ namespace Axe.Logging.Test
             Assert.Equal(doNotCareLogEntryTwo, logEntries[1]);
         }
 
+        [Fact]
+        public void should_get_one_default_log_entry_given_aggregate_exception_with_all_inner_exceptions_not_marked()
+        {
+            var innerExceptionNotMarkedOne = new Exception("inner exception one");
+            var innerExceptionNotMarkedTwo = new Exception("inner exception two");
+            var exception = new AggregateException("aggregate exceptions", innerExceptionNotMarkedOne, innerExceptionNotMarkedTwo);
+
+            LogEntry[] logEntries = exception.GetLogEntry();
+
+            Assert.Equal(Level.Unknown, logEntries.Single().Level);
+        }
 
         private static LogEntry CreateLogEntry()
         {
