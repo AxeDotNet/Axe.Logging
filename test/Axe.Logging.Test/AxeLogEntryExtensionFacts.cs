@@ -97,9 +97,10 @@ namespace Axe.Logging.Test
             var innerExceptionNotMarkedTwo = new Exception("inner exception two");
             var exception = new AggregateException("aggregate exceptions", innerExceptionNotMarkedOne, innerExceptionNotMarkedTwo);
 
-            LogEntry[] logEntries = exception.GetLogEntry();
+            LogEntry logEntry = exception.GetLogEntry().Single();
 
-            Assert.Equal(Level.Unknown, logEntries.Single().Level);
+            Assert.Equal(Level.Unknown, logEntry.Level);
+            Assert.Equal(exception, logEntry.Data);
         }
 
         [Fact]
@@ -113,8 +114,11 @@ namespace Axe.Logging.Test
             LogEntry[] logEntries = exception.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
+
             Assert.Equal(doNotCareLogEntry, logEntries[0]);
+
             Assert.Equal(Level.Unknown, logEntries[1].Level);
+            Assert.Equal(exception, logEntries[1].Data);
         }
 
         [Fact]
@@ -135,7 +139,10 @@ namespace Axe.Logging.Test
             LogEntry doNotCareLogEntry = CreateLogEntry();
             var exception = new Exception("exception level 1", new Exception("exception level 2").Mark(doNotCareLogEntry));
 
-            Assert.Equal(Level.Unknown, exception.GetLogEntry(1).Single().Level);
+            LogEntry logEntry = exception.GetLogEntry(1).Single();
+
+            Assert.Equal(Level.Unknown, logEntry.Level);
+            Assert.Equal(exception, logEntry.Data);
         }
 
         [Fact]
@@ -144,12 +151,14 @@ namespace Axe.Logging.Test
             LogEntry doNotCareLogEntryOne = CreateLogEntry();
             LogEntry doNotCareLogEntryTwo = CreateLogEntry();
 
-            Exception innerExceptionOne = new Exception("exception level 1", new Exception("exception level 2")).Mark(doNotCareLogEntryOne);
-            var innerExceptionTwo = new Exception("exception level 1", new Exception("exception level 2", new Exception("exception level 3").Mark(doNotCareLogEntryTwo)));
+            Exception innerExceptionOne = new Exception("exception level 2", new Exception("exception level 3")).Mark(doNotCareLogEntryOne);
+            var innerExceptionTwo = new Exception("exception level 2", new Exception("exception level 3", new Exception("exception level 4").Mark(doNotCareLogEntryTwo)));
             var aggregateException = new AggregateException(innerExceptionOne, innerExceptionTwo);
 
             Assert.Equal(doNotCareLogEntryOne, aggregateException.GetLogEntry(2)[0]);
+
             Assert.Equal(Level.Unknown, aggregateException.GetLogEntry(2)[1].Level);
+            Assert.Equal(aggregateException, aggregateException.GetLogEntry(2)[1].Data);
         }
 
         [Fact]
@@ -161,7 +170,7 @@ namespace Axe.Logging.Test
 
             var innerExceptionOne = new Exception("exception level 4", new Exception("exception level 5")).Mark(doNotCareLogEntryOne);
             var innerExceptionTwo = new Exception("exception level 4", new Exception("exception level 5").Mark(doNotCareLogEntryTwo));
-            var exception = new Exception("exception level 1", new Exception("exception level 2", new AggregateException(innerExceptionOne, innerExceptionTwo)).Mark(doNotCareLogEntryThree));
+            var exception = new Exception("exception level 1", new Exception("exception level 2", new AggregateException("exception level 3", innerExceptionOne, innerExceptionTwo)).Mark(doNotCareLogEntryThree));
 
             Assert.Equal(3, exception.GetLogEntry(6).Length);
             Assert.Equal(doNotCareLogEntryThree, exception.GetLogEntry(6)[0]);

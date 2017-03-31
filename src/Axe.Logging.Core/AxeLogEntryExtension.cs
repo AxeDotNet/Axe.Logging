@@ -32,7 +32,7 @@ namespace Axe.Logging.Core
             return logEntries.ToArray();
         }
 
-        private static void VerifyException<T>(T exception) where T : Exception
+        private static void VerifyException(Exception exception)
         {
             if (exception != null) return;
             throw new ArgumentNullException(nameof(exception));
