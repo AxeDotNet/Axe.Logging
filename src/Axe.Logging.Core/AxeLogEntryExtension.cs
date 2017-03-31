@@ -11,6 +11,12 @@ namespace Axe.Logging.Core
         public static T Mark<T>(this T exception, LogEntry logEntry) where T : Exception
         {
             VerifyException(exception);
+
+            if (exception.Data[LOG_ENTRY_KEY] != null)
+            {
+                exception.Data.Remove(LOG_ENTRY_KEY);
+            }
+
             exception.Data.Add(LOG_ENTRY_KEY, logEntry);
             return exception;
         }

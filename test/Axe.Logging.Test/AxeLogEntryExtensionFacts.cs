@@ -27,6 +27,17 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
+        public void should_replace_the_marked_log_entry_when_mark_a_exception_already_marked()
+        {
+            LogEntry oldLogEntry = CreateLogEntry();
+            Exception exception = new Exception().Mark(oldLogEntry);
+            LogEntry newLogEntry = CreateLogEntry();
+            exception.Mark(newLogEntry);
+
+            Assert.Equal(newLogEntry, exception.GetLogEntry().Single());
+        }
+
+        [Fact]
         public void should_get_empty_log_entry_collection_when_exception_is_null()
         {
             Exception exception = null;
