@@ -22,12 +22,4 @@ namespace Axe.Logging.Core
         public object Data { get; }
         public Level Level { get; }
     }
-
-
-    public enum Level
-    {
-        DefinedByBusiness,
-        IKnowItWillHappen,
-        Unknown
-    }
 }
