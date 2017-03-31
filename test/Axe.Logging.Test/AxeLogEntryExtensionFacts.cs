@@ -42,7 +42,8 @@ namespace Axe.Logging.Test
             LogEntry logEntry = exception.GetLogEntry().Single();
 
             Assert.Equal(DateTime.UtcNow, logEntry.Time);
-            Assert.Equal(exception.Message, logEntry.Entry);
+            Assert.Equal(null, logEntry.Entry);
+            Assert.Equal(null, logEntry.User);
             Assert.Equal(exception, logEntry.Data);
             Assert.Equal(Level.Unknown, logEntry.Level);
         }
