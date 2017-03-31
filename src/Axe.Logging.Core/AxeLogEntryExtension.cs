@@ -10,7 +10,7 @@ namespace Axe.Logging.Core
 
         public static T Mark<T>(this T exception, LogEntry logEntry) where T : Exception
         {
-            VerifyException(exception);
+            Validate(exception, logEntry);
 
             if (exception.Data[LOG_ENTRY_KEY] != null)
             {
@@ -41,9 +41,9 @@ namespace Axe.Logging.Core
             return logEntries.ToArray();
         }
 
-        private static void VerifyException(Exception exception)
+        private static void Validate(Exception exception, LogEntry logEntry)
         {
-            if (exception != null) return;
+            if (exception != null && logEntry != null) return;
             throw new ArgumentNullException(nameof(exception));
         }
 

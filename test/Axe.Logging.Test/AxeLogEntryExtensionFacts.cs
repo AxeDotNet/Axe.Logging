@@ -27,6 +27,14 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
+        public void should_throw_argumet_null_exception_when_mark_exception_given_log_entry_is_null()
+        {
+            Exception exception = new Exception();
+
+            Assert.Throws<ArgumentNullException>(() => exception.Mark(null));
+        }
+
+        [Fact]
         public void should_replace_the_marked_log_entry_when_mark_a_exception_already_marked()
         {
             LogEntry oldLogEntry = CreateLogEntry();
