@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Axe.Logging.Core
 {
@@ -57,7 +58,8 @@ namespace Axe.Logging.Core
             var aggregateException = exception as AggregateException;
             if (aggregateException != null)
             {
-                var isGetLogEntryFromException = true;
+                bool isGetLogEntryFromException = aggregateException.InnerExceptions.Any();
+
                 foreach (Exception ex in aggregateException.InnerExceptions)
                 {
                     if (ex == null) { continue; }

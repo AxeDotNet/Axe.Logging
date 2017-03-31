@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Axe.Logging.Core;
 using Xunit;
 
@@ -114,6 +115,18 @@ namespace Axe.Logging.Test
             Assert.Equal(2, logEntries.Length);
             Assert.Equal(doNotCareLogEntry, logEntries[0]);
             Assert.Equal(Level.Unknown, logEntries[1].Level);
+        }
+
+        [Fact]
+        public void should_return_Unknown_log_entry_given_aggregateException_has_no_inner_exceptions()
+        {
+            LogEntry doNotCare = CreateLogEntry();
+            var exception = new Exception("exception", new AggregateException()).Mark(doNotCare);
+
+            LogEntry[] logEntry = exception.GetLogEntry();
+
+            Assert.Equal(Level.Unknown, logEntry[1].Level);
+            Assert.Equal(exception, logEntry[1].Data);
         }
 
         [Fact]
