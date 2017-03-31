@@ -17,7 +17,10 @@ namespace Axe.Logging.Core
 
         public static LogEntry[] GetLogEntry(this Exception exception, int maxLevel = 10)
         {
-            VerifyException(exception);
+            if (exception == null)
+            {
+                return new List<LogEntry>().ToArray();
+            }
 
             var logEntries = new List<LogEntry>();
 

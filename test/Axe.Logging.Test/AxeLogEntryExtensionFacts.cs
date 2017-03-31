@@ -27,11 +27,11 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void should_throw_argumet_null_exception_when_get_log_entry_from_a_null_exception()
+        public void should_get_empty_log_entry_collection_when_exception_is_null()
         {
             Exception exception = null;
 
-            Assert.Throws<ArgumentNullException>(() => exception.GetLogEntry());
+            Assert.Equal(0, exception.GetLogEntry().Length);
         }
 
         [Fact]
