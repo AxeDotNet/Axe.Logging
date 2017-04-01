@@ -36,6 +36,10 @@ namespace Axe.Logging.Core
             }
 
             LogEntry defaultUknownException = CreateDefaultUknownException(exception);
+            if (logEntries.Any())
+            {
+                defaultUknownException.Id = logEntries.First().Id;
+            }
             logEntries.Add(defaultUknownException);
 
             return logEntries.ToArray();
@@ -60,6 +64,11 @@ namespace Axe.Logging.Core
             var logEntry = logEntryObject as LogEntry;
             if (logEntry != null)
             {
+                if (logEntries.Any())
+                {
+                    logEntry.Id = logEntries.First().Id;
+                }
+
                 logEntries.Add(logEntry);
                 markedExceptionFound = true;
             }

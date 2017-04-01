@@ -15,7 +15,7 @@ namespace Axe.Logging.Core
             Level = level;
         }
 
-        public Guid Id { get; }
+        public Guid Id { get; set; }
         public DateTime Time { get; }
         public string Entry { get; }
         public object User { get; }
