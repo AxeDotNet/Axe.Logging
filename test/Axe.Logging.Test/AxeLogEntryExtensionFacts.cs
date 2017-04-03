@@ -10,25 +10,25 @@ namespace Axe.Logging.Test
         [Fact]
         public void should_get_log_entry_from_any_marked_exception()
         {
-            LogEntry doNotCare = CreateLogEntry();
-            Exception exception = new Exception().Mark(doNotCare);
+            LogEntry logEntry = CreateLogEntry();
+            Exception exception = new Exception().Mark(logEntry);
 
-            Assert.Equal(doNotCare, exception.GetLogEntry().Single());
+            Assert.Equal(logEntry, exception.GetLogEntry().Single());
         }
 
         [Fact]
         public void should_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
         {
             Exception exception = null;
-            LogEntry doNotCare = CreateLogEntry();
+            LogEntry logEntry = CreateLogEntry();
 
-            Assert.Throws<ArgumentNullException>(() => exception.Mark(doNotCare));
+            Assert.Throws<ArgumentNullException>(() => exception.Mark(logEntry));
         }
 
         [Fact]
         public void should_throw_argumet_null_exception_when_mark_exception_given_log_entry_is_null()
         {
-            Exception exception = new Exception();
+            var exception = new Exception();
 
             Assert.Throws<ArgumentNullException>(() => exception.Mark(null));
         }
@@ -37,8 +37,9 @@ namespace Axe.Logging.Test
         public void should_replace_the_marked_log_entry_when_mark_a_exception_already_marked()
         {
             LogEntry oldLogEntry = CreateLogEntry();
-            Exception exception = new Exception().Mark(oldLogEntry);
             LogEntry newLogEntry = CreateLogEntry();
+
+            Exception exception = new Exception().Mark(oldLogEntry);
             exception.Mark(newLogEntry);
 
             Assert.Equal(newLogEntry, exception.GetLogEntry().Single());
@@ -49,7 +50,7 @@ namespace Axe.Logging.Test
         {
             Exception exception = null;
 
-            Assert.Equal(0, exception.GetLogEntry().Length);
+            Assert.Empty(exception.GetLogEntry());
         }
 
         [Fact]
@@ -60,63 +61,67 @@ namespace Axe.Logging.Test
             LogEntry logEntry = exception.GetLogEntry().Single();
 
             Assert.Equal(DateTime.UtcNow, logEntry.Time);
-            Assert.Equal(null, logEntry.Entry);
-            Assert.Equal(null, logEntry.User);
             Assert.Equal(exception, logEntry.Data);
             Assert.Equal(Level.Unknown, logEntry.Level);
         }
 
         [Fact]
-        public void should_get_log_entry_of_exception_given_linked_type_exception_and_log_entry_existed_in_inner_exception()
+        public void should_get_log_entry_of_exception_if_log_entry_existed_in_inner_exception()
         {
-            LogEntry doNotCare = CreateLogEntry();
-            Exception innerExceptionWithLogEntry = new Exception().Mark(doNotCare);
-            var exception = new Exception("do not care exception One", new Exception("do not care exception Two", innerExceptionWithLogEntry));
+            LogEntry logEntry = CreateLogEntry();
+            Exception innerExceptionWithLogEntry = new Exception().Mark(logEntry);
+            var exception = new Exception("parent", innerExceptionWithLogEntry);
 
-            Assert.Equal(doNotCare, exception.GetLogEntry().Single());
+            Assert.Equal(logEntry, exception.GetLogEntry().Single());
         }
 
         [Fact]
-        public void should_get_all_log_entries_and_with_same_id_given_linked_list_type_exception_with_multiple_marked_exceptions()
+        public void should_get_all_log_entries_with_same_id_for_multiple_marked_exceptions()
         {
-            LogEntry doNotCareLogEntryOne = CreateLogEntry();
-            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
+            LogEntry logEntryOnParent = CreateLogEntry();
+            LogEntry logEntryOnInner = CreateLogEntry();
 
-            Exception innerException = new Exception("inner exception").Mark(doNotCareLogEntryTwo);
-            Exception exception = new Exception("exception One", innerException).Mark(doNotCareLogEntryOne);
+            Exception innerException = new Exception("inner").Mark(logEntryOnInner);
+            Exception parentException = new Exception("parent", innerException).Mark(logEntryOnParent);
 
-            LogEntry[] logEntries = exception.GetLogEntry();
+            LogEntry[] logEntries = parentException.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
-            Assert.Equal(doNotCareLogEntryOne, logEntries[0]);
-            Assert.Equal(doNotCareLogEntryTwo, logEntries[1]);
+            Assert.Equal(logEntryOnParent, logEntries[0]);
+            Assert.Equal(logEntryOnInner, logEntries[1]);
             Assert.True(logEntries[0].Id == logEntries[1].Id);
         }
 
         [Fact]
-        public void should_get_all_log_entries_and_with_same_id_given_aggregate_exception_with_multiple_marked_exceptions()
+        public void should_get_all_log_entries_with_same_id_for_multiple_marked_aggregated_exceptions()
         {
-            LogEntry doNotCareLogEntryOne = CreateLogEntry();
-            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
+            LogEntry logEntry1 = CreateLogEntry();
+            LogEntry logEntry2 = CreateLogEntry();
 
-            Exception innerExceptionMarkedOne = new Exception("inner exception one").Mark(doNotCareLogEntryOne);
-            Exception innerExceptionMarkedTwo = new Exception("inner exception two").Mark(doNotCareLogEntryTwo);
-            var exception = new AggregateException("aggregate exceptions", innerExceptionMarkedOne, innerExceptionMarkedTwo);
+            Exception innerExceptionMarkedOne = new Exception("inner exception one").Mark(logEntry1);
+            Exception innerExceptionMarkedTwo = new Exception("inner exception two").Mark(logEntry2);
+            var exception = new AggregateException(
+                "aggregate exceptions", 
+                innerExceptionMarkedOne, 
+                innerExceptionMarkedTwo);
 
             LogEntry[] logEntries = exception.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
-            Assert.True(logEntries.Contains(doNotCareLogEntryOne));
-            Assert.True(logEntries.Contains(doNotCareLogEntryTwo));
+            Assert.True(logEntries.Contains(logEntry1));
+            Assert.True(logEntries.Contains(logEntry2));
             Assert.True(logEntries[0].Id == logEntries[1].Id);
         }
 
         [Fact]
         public void should_get_one_default_log_entry_given_aggregate_exception_with_all_inner_exceptions_not_marked()
         {
-            var innerExceptionNotMarkedOne = new Exception("inner exception one");
-            var innerExceptionNotMarkedTwo = new Exception("inner exception two");
-            var exception = new AggregateException("aggregate exceptions", innerExceptionNotMarkedOne, innerExceptionNotMarkedTwo);
+            var notMarkedExceptionOne = new Exception("inner exception one");
+            var notMarkedExceptionTwo = new Exception("inner exception two");
+            var exception = new AggregateException(
+                "aggregate exceptions", 
+                notMarkedExceptionOne, 
+                notMarkedExceptionTwo);
 
             LogEntry logEntry = exception.GetLogEntry().Single();
 
@@ -125,94 +130,101 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void should_get_log_entries_with_one_default_and_id_should_be_same_with_other_log_engtries_given_aggregate_exception_with_one_inner_exception_marked_and_others_not_marked()
+        public void should_get_unknown_log_entries_when_not_all_branches_marked()
         {
-            LogEntry doNotCareLogEntry = CreateLogEntry();
-            var innerExceptionNotMarkedOne = new Exception("inner exception one", new Exception("inner exception one"));
-            var innerExceptionMarkedTwo = new Exception("inner exception two", new Exception("inner exception two", new Exception("inner exception two")).Mark(doNotCareLogEntry));
-            var exception = new AggregateException("aggregate exceptions", innerExceptionNotMarkedOne, innerExceptionMarkedTwo);
+            LogEntry logEntry = CreateLogEntry();
+            var notMarkedException = new Exception();
+            var markedException = new Exception().Mark(logEntry);
+            var exception = new AggregateException("aggregate exceptions", notMarkedException, markedException);
 
             LogEntry[] logEntries = exception.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
-            Assert.Equal(doNotCareLogEntry, logEntries[0]);
-            Assert.Equal(Level.Unknown, logEntries[1].Level);
-            Assert.Equal(exception, logEntries[1].Data);
+            Assert.True(logEntries.Contains(logEntry));
+
+            var notMarkedEntry = logEntries.Single(e => e.Level == Level.Unknown);
+            Assert.Equal(exception, notMarkedEntry.Data);
 
             Assert.True(logEntries[0].Id == logEntries[1].Id);
         }
 
         [Fact]
-        public void should_return_Unknown_log_entry_given_aggregateException_has_no_inner_exceptions()
+        public void should_return_unknown_log_entry_given_aggregateException_has_no_inner_exceptions()
         {
-            LogEntry doNotCare = CreateLogEntry();
-            var exception = new Exception("exception", new AggregateException()).Mark(doNotCare);
+            var exception = new AggregateException();
 
             LogEntry[] logEntries = exception.GetLogEntry();
 
-            Assert.Equal(2, logEntries.Length);
-            Assert.Equal(doNotCare, logEntries[0]);
-            Assert.Equal(Level.Unknown, logEntries[1].Level);
-            Assert.Equal(exception, logEntries[1].Data);
-
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
+            Assert.Equal(1, logEntries.Length);
+            LogEntry retrivedLogEntry = logEntries.Single();
+            
+            Assert.Equal(Level.Unknown, retrivedLogEntry.Level);
+            Assert.Equal(exception, retrivedLogEntry.Data);
         }
 
         [Fact]
-        public void should_get_unknown_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_with_log_entry_in_the_maxlevel()
+        public void should_get_unknown_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_within_maxlevel()
         {
-            LogEntry doNotCareLogEntry = CreateLogEntry();
-            var exception = new Exception("exception level 1", new Exception("exception level 2").Mark(doNotCareLogEntry));
+            LogEntry logEntry = CreateLogEntry();
+            var exception = new Exception(
+                "exception level 1", 
+                new Exception("exception level 2").Mark(logEntry));
 
-            LogEntry logEntry = exception.GetLogEntry(1).Single();
+            LogEntry retrived = exception.GetLogEntry(1).Single();
 
-            Assert.Equal(Level.Unknown, logEntry.Level);
-            Assert.Equal(exception, logEntry.Data);
+            Assert.Equal(Level.Unknown, retrived.Level);
+            Assert.Equal(exception, retrived.Data);
         }
 
         [Fact]
         public void should_get_log_entries_with_exceptions_marked_in_the_maxlevel()
         {
-            LogEntry doNotCareLogEntryOne = CreateLogEntry();
-            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
+            LogEntry logEntry = CreateLogEntry();
 
-            Exception innerExceptionOne = new Exception("exception level 2", new Exception("exception level 3")).Mark(doNotCareLogEntryOne);
-            var innerExceptionTwo = new Exception("exception level 2", new Exception("exception level 3", new Exception("exception level 4").Mark(doNotCareLogEntryTwo)));
-            var aggregateException = new AggregateException(innerExceptionOne, innerExceptionTwo);
+            var aggregateException = new Exception(
+                "level 1", 
+                new Exception(
+                    "level 2",
+                    new Exception(
+                        "level 3",
+                        new Exception("level 4").Mark(logEntry))));
 
-            LogEntry[] logEntries = aggregateException.GetLogEntry(2);
+            LogEntry retrived = aggregateException.GetLogEntry(4).Single();
 
-            Assert.Equal(doNotCareLogEntryOne, logEntries[0]);
-
-            Assert.Equal(Level.Unknown, logEntries[1].Level);
-            Assert.Equal(aggregateException, logEntries[1].Data);
-
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
+            Assert.Equal(logEntry, retrived);
+            Assert.Equal(logEntry.Level, retrived.Level);
         }
 
         [Fact]
         public void should_get_log_entries_for_exception_contains_aggregate_exception()
         {
-            LogEntry doNotCareLogEntryOne = CreateLogEntry();
-            LogEntry doNotCareLogEntryTwo = CreateLogEntry();
-            LogEntry doNotCareLogEntryThree = CreateLogEntry();
+            LogEntry logEntry41 = CreateLogEntry();
+            LogEntry logEntry52 = CreateLogEntry();
+            LogEntry logEntry2 = CreateLogEntry();
 
-            var innerExceptionOne = new Exception("exception level 4", new Exception("exception level 5")).Mark(doNotCareLogEntryOne);
-            var innerExceptionTwo = new Exception("exception level 4", new Exception("exception level 5").Mark(doNotCareLogEntryTwo));
-            var exception = new Exception("exception level 1", new Exception("exception level 2", new AggregateException("exception level 3", innerExceptionOne, innerExceptionTwo)).Mark(doNotCareLogEntryThree));
+            var exception = new Exception(
+                "level 1",
+                new Exception("level 2",
+                        new AggregateException("level 3",
+                            new Exception(
+                                "level 4.1",
+                                new Exception("level 5.1")).Mark(logEntry41),
+                            new Exception(
+                                "level 4.2",
+                                new Exception("level 5.2").Mark(logEntry52))))
+                    .Mark(logEntry2));
 
             LogEntry[] logEntries = exception.GetLogEntry(6);
 
             Assert.Equal(3, logEntries.Length);
-            Assert.Equal(doNotCareLogEntryThree, logEntries[0]);
-            Assert.True(logEntries.Contains(doNotCareLogEntryOne));
-            Assert.True(logEntries.Contains(doNotCareLogEntryTwo));
+            Assert.Contains(logEntry2, logEntries);
+            Assert.Contains(logEntry41, logEntries);
+            Assert.Contains(logEntry52, logEntries);
 
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
-            Assert.True(logEntries[0].Id == logEntries[2].Id);
+            Assert.True(logEntries.Select(e => e.Id).Distinct().Count() == 1);
         }
 
-        private static LogEntry CreateLogEntry()
+        static LogEntry CreateLogEntry()
         {
             var logEntry = new LogEntry(Guid.NewGuid(), DateTime.UtcNow, "This is Entry", new { Id = 1 }, new { Country = "China" }, Level.DefinedByBusiness);
             return logEntry;
