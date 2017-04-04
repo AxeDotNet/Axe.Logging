@@ -37,6 +37,8 @@
     <Compile Include="AxeLogEntryExtension.cs" />
     <Compile Include="Level.cs" />
     <Compile Include="LogEntry.cs" />
+    <Compile Include="LogEntryMark.cs" />
+    <Compile Include="LogLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

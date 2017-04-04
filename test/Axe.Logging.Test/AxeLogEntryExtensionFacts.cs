@@ -7,20 +7,34 @@ namespace Axe.Logging.Test
 {
     public class AxeLogEntryExtensionFacts
     {
-        [Fact]
-        public void should_get_log_entry_from_any_marked_exception()
+        [Theory]
+        [InlineData(Level.DefinedByBusiness, LogLevel.Info)]
+        [InlineData(Level.IKnowItWillHappen, LogLevel.Warning)]
+        [InlineData(Level.Unknown, LogLevel.Error)]
+        public void should_get_log_entry_from_any_marked_exception(Level levelMarked, LogLevel loglevel)
         {
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry(levelMarked);
             Exception exception = new Exception().Mark(logEntry);
 
-            Assert.Equal(logEntry, exception.GetLogEntry().Single());
+            LogEntry logEntryResult = exception.GetLogEntry().Single();
+
+            VerifyLogEntry(logEntry, logEntryResult, loglevel);
+        }
+
+        private static void VerifyLogEntry(LogEntryMark logEntryMarked, LogEntry logEntryResult, LogLevel logLevel = LogLevel.Info)
+        {
+            Assert.Equal(logEntryMarked.Time, logEntryResult.Time);
+            Assert.Equal(logEntryMarked.Entry, logEntryResult.Entry);
+            Assert.Equal(logEntryMarked.User, logEntryResult.User);
+            Assert.Equal(logEntryMarked.Data, logEntryResult.Data);
+            Assert.Equal(logLevel, logEntryResult.Level);
         }
 
         [Fact]
         public void should_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
         {
             Exception exception = null;
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry();
 
             Assert.Throws<ArgumentNullException>(() => exception.Mark(logEntry));
         }
@@ -36,13 +50,13 @@ namespace Axe.Logging.Test
         [Fact]
         public void should_replace_the_marked_log_entry_when_mark_a_exception_already_marked()
         {
-            LogEntry oldLogEntry = CreateLogEntry();
-            LogEntry newLogEntry = CreateLogEntry();
+            LogEntryMark oldLogEntry = CreateLogEntry();
+            LogEntryMark newLogEntry = CreateLogEntry();
 
             Exception exception = new Exception().Mark(oldLogEntry);
             exception.Mark(newLogEntry);
 
-            Assert.Equal(newLogEntry, exception.GetLogEntry().Single());
+            VerifyLogEntry(newLogEntry, exception.GetLogEntry().Single());
         }
 
         [Fact]
@@ -62,24 +76,26 @@ namespace Axe.Logging.Test
 
             Assert.Equal(DateTime.UtcNow, logEntry.Time);
             Assert.Equal(exception, logEntry.Data);
-            Assert.Equal(Level.Unknown, logEntry.Level);
+            Assert.Equal(LogLevel.Error, logEntry.Level);
         }
 
         [Fact]
         public void should_get_log_entry_of_exception_if_log_entry_existed_in_inner_exception()
         {
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry();
             Exception innerExceptionWithLogEntry = new Exception().Mark(logEntry);
             var exception = new Exception("parent", innerExceptionWithLogEntry);
 
-            Assert.Equal(logEntry, exception.GetLogEntry().Single());
+            LogEntry logEntryResult = exception.GetLogEntry().Single();
+
+            VerifyLogEntry(logEntry, logEntryResult);
         }
 
         [Fact]
         public void should_get_all_log_entries_with_same_id_for_multiple_marked_exceptions()
         {
-            LogEntry logEntryOnParent = CreateLogEntry();
-            LogEntry logEntryOnInner = CreateLogEntry();
+            LogEntryMark logEntryOnParent = CreateLogEntry();
+            LogEntryMark logEntryOnInner = CreateLogEntry();
 
             Exception innerException = new Exception("inner").Mark(logEntryOnInner);
             Exception parentException = new Exception("parent", innerException).Mark(logEntryOnParent);
@@ -87,16 +103,16 @@ namespace Axe.Logging.Test
             LogEntry[] logEntries = parentException.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
-            Assert.Equal(logEntryOnParent, logEntries[0]);
-            Assert.Equal(logEntryOnInner, logEntries[1]);
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
+            VerifyLogEntry(logEntryOnParent, logEntries[0]);
+            VerifyLogEntry(logEntryOnInner, logEntries[1]);
+            Assert.True(logEntries[0].AggregateId == logEntries[1].AggregateId);
         }
 
         [Fact]
         public void should_get_all_log_entries_with_same_id_for_multiple_marked_aggregated_exceptions()
         {
-            LogEntry logEntry1 = CreateLogEntry();
-            LogEntry logEntry2 = CreateLogEntry();
+            LogEntryMark logEntry1 = CreateLogEntry(Level.DefinedByBusiness);
+            LogEntryMark logEntry2 = CreateLogEntry(Level.IKnowItWillHappen);
 
             Exception innerExceptionMarkedOne = new Exception("inner exception one").Mark(logEntry1);
             Exception innerExceptionMarkedTwo = new Exception("inner exception two").Mark(logEntry2);
@@ -106,11 +122,14 @@ namespace Axe.Logging.Test
                 innerExceptionMarkedTwo);
 
             LogEntry[] logEntries = exception.GetLogEntry();
+            var innerExceptionMarkedOneResult = logEntries.Single(l => l.Level == LogLevel.Info);
+            var innerExceptionMarkedTwoResult = logEntries.Single(l => l.Level == LogLevel.Warning);
 
             Assert.Equal(2, logEntries.Length);
-            Assert.True(logEntries.Contains(logEntry1));
-            Assert.True(logEntries.Contains(logEntry2));
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
+
+            VerifyLogEntry(logEntry1, innerExceptionMarkedOneResult);
+            VerifyLogEntry(logEntry2, innerExceptionMarkedTwoResult, LogLevel.Warning);
+            Assert.True(logEntries[0].AggregateId == logEntries[1].AggregateId);
         }
 
         [Fact]
@@ -125,14 +144,14 @@ namespace Axe.Logging.Test
 
             LogEntry logEntry = exception.GetLogEntry().Single();
 
-            Assert.Equal(Level.Unknown, logEntry.Level);
+            Assert.Equal(LogLevel.Error, logEntry.Level);
             Assert.Equal(exception, logEntry.Data);
         }
 
         [Fact]
-        public void should_get_unknown_log_entries_when_not_all_branches_marked()
+        public void should_get_error_log_entries_when_not_all_branches_marked()
         {
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry();
             var notMarkedException = new Exception();
             var markedException = new Exception().Mark(logEntry);
             var exception = new AggregateException("aggregate exceptions", notMarkedException, markedException);
@@ -140,16 +159,18 @@ namespace Axe.Logging.Test
             LogEntry[] logEntries = exception.GetLogEntry();
 
             Assert.Equal(2, logEntries.Length);
-            Assert.True(logEntries.Contains(logEntry));
 
-            var notMarkedEntry = logEntries.Single(e => e.Level == Level.Unknown);
+            var markedEntry = logEntries.Single(e => e.Level != LogLevel.Error);
+            VerifyLogEntry(logEntry, markedEntry);
+
+            var notMarkedEntry = logEntries.Single(e => e.Level == LogLevel.Error);
             Assert.Equal(exception, notMarkedEntry.Data);
 
-            Assert.True(logEntries[0].Id == logEntries[1].Id);
+            Assert.True(logEntries[0].AggregateId == logEntries[1].AggregateId);
         }
 
         [Fact]
-        public void should_return_unknown_log_entry_given_aggregateException_has_no_inner_exceptions()
+        public void should_return_error_log_entry_given_aggregateException_has_no_inner_exceptions()
         {
             var exception = new AggregateException();
 
@@ -158,28 +179,28 @@ namespace Axe.Logging.Test
             Assert.Equal(1, logEntries.Length);
             LogEntry retrivedLogEntry = logEntries.Single();
             
-            Assert.Equal(Level.Unknown, retrivedLogEntry.Level);
+            Assert.Equal(LogLevel.Error, retrivedLogEntry.Level);
             Assert.Equal(exception, retrivedLogEntry.Data);
         }
 
         [Fact]
-        public void should_get_unknown_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_within_maxlevel()
+        public void should_get_error_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_within_maxlevel()
         {
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry();
             var exception = new Exception(
                 "exception level 1", 
                 new Exception("exception level 2").Mark(logEntry));
 
             LogEntry retrived = exception.GetLogEntry(1).Single();
 
-            Assert.Equal(Level.Unknown, retrived.Level);
+            Assert.Equal(LogLevel.Error, retrived.Level);
             Assert.Equal(exception, retrived.Data);
         }
 
         [Fact]
         public void should_get_log_entries_with_exceptions_marked_in_the_maxlevel()
         {
-            LogEntry logEntry = CreateLogEntry();
+            LogEntryMark logEntry = CreateLogEntry();
 
             var aggregateException = new Exception(
                 "level 1", 
@@ -190,17 +211,16 @@ namespace Axe.Logging.Test
                         new Exception("level 4").Mark(logEntry))));
 
             LogEntry retrived = aggregateException.GetLogEntry(4).Single();
-
-            Assert.Equal(logEntry, retrived);
-            Assert.Equal(logEntry.Level, retrived.Level);
+            
+            VerifyLogEntry(logEntry, retrived);
         }
 
         [Fact]
         public void should_get_log_entries_for_exception_contains_aggregate_exception()
         {
-            LogEntry logEntry41 = CreateLogEntry();
-            LogEntry logEntry52 = CreateLogEntry();
-            LogEntry logEntry2 = CreateLogEntry();
+            LogEntryMark logEntry41 = CreateLogEntry(Level.DefinedByBusiness);
+            LogEntryMark logEntry52 = CreateLogEntry(Level.IKnowItWillHappen);
+            LogEntryMark logEntry2 = CreateLogEntry(Level.Unknown);
 
             var exception = new Exception(
                 "level 1",
@@ -217,16 +237,21 @@ namespace Axe.Logging.Test
             LogEntry[] logEntries = exception.GetLogEntry(6);
 
             Assert.Equal(3, logEntries.Length);
-            Assert.Contains(logEntry2, logEntries);
-            Assert.Contains(logEntry41, logEntries);
-            Assert.Contains(logEntry52, logEntries);
 
-            Assert.True(logEntries.Select(e => e.Id).Distinct().Count() == 1);
+            var logEntry41Result = logEntries.Single(e => e.Level == LogLevel.Info);
+            var logEntry52Result = logEntries.Single(e => e.Level == LogLevel.Warning);
+            var logEntry2Result = logEntries.Single(e => e.Level == LogLevel.Error);
+
+            VerifyLogEntry(logEntry2, logEntry2Result, LogLevel.Error);
+            VerifyLogEntry(logEntry41, logEntry41Result, LogLevel.Info);
+            VerifyLogEntry(logEntry52, logEntry52Result, LogLevel.Warning);
+
+            Assert.True(logEntries.Select(e => e.AggregateId).Distinct().Count() == 1);
         }
 
-        static LogEntry CreateLogEntry()
+        static LogEntryMark CreateLogEntry(Level levelMarked = Level.DefinedByBusiness)
         {
-            var logEntry = new LogEntry(Guid.NewGuid(), DateTime.UtcNow, "This is Entry", new { Id = 1 }, new { Country = "China" }, Level.DefinedByBusiness);
+            var logEntry = new LogEntryMark(DateTime.UtcNow, "This is Entry", new { Id = 1 }, new { Country = "China" }, levelMarked);
             return logEntry;
         }
     }
