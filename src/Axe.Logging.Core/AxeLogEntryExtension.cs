@@ -53,7 +53,7 @@ namespace Axe.Logging.Core
 
         private static LogEntry CreateDefaultUknownException(Exception exception)
         {
-            return new LogEntry(Guid.Empty, DateTime.UtcNow, null, null, exception, Level.Unknown);
+            return new LogEntry(Guid.NewGuid(), DateTime.UtcNow, null, null, exception, Level.Unknown);
         }
 
         private static bool FillLogEntries(Exception exception, int maxLevel, List<LogEntry> logEntries, bool markedExceptionFound = false, int currentLevel = 1)
