@@ -23,12 +23,12 @@ namespace Axe.Logging.Core
 
         public static LogEntry[] GetLogEntry(this Exception exception, int maxLevel = 10)
         {
+            var logEntries = new List<LogEntry>();
             if (exception == null)
             {
-                return new List<LogEntry>().ToArray();
+                return logEntries.ToArray();
             }
 
-            var logEntries = new List<LogEntry>();
             var aggreateId = Guid.NewGuid();
             if (FillLogEntries(exception, maxLevel, logEntries, aggreateId))
             {
@@ -60,7 +60,7 @@ namespace Axe.Logging.Core
             var logEntry = logEntryObject as LogEntryMark;
             if (logEntry != null)
             {
-                var level = GetLogLevel(logEntry);
+                LogLevel level = GetLogLevel(logEntry);
                 var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Entry, logEntry.User, logEntry.Data, level);
 
                 logEntries.Add(entry);
@@ -70,17 +70,7 @@ namespace Axe.Logging.Core
             var aggregateException = exception as AggregateException;
             if (aggregateException != null)
             {
-                bool isGetLogEntryFromException = aggregateException.InnerExceptions.Any();
-
-                foreach (Exception ex in aggregateException.InnerExceptions)
-                {
-                    if (ex == null) { continue; }
-                    if (!FillLogEntries(ex, maxLevel, logEntries, aggreateId, currentLevel: currentLevel + 1))
-                    {
-                        isGetLogEntryFromException = false;
-                    }
-                }
-                return isGetLogEntryFromException;
+                return FillLogEntriesForAggregateException(maxLevel, logEntries, aggreateId, currentLevel, aggregateException);
             }
 
             if (exception.InnerException == null)
@@ -89,6 +79,25 @@ namespace Axe.Logging.Core
             }
 
             return FillLogEntries(exception.InnerException, maxLevel, logEntries, aggreateId, markedExceptionFound, currentLevel + 1);
+        }
+
+        private static bool FillLogEntriesForAggregateException(int maxLevel, List<LogEntry> logEntries, Guid aggreateId, int currentLevel,
+            AggregateException aggregateException)
+        {
+            bool isGetLogEntryFromException = aggregateException.InnerExceptions.Any();
+
+            foreach (Exception ex in aggregateException.InnerExceptions)
+            {
+                if (ex == null)
+                {
+                    continue;
+                }
+                if (!FillLogEntries(ex, maxLevel, logEntries, aggreateId, currentLevel: currentLevel + 1))
+                {
+                    isGetLogEntryFromException = false;
+                }
+            }
+            return isGetLogEntryFromException;
         }
 
         private static LogLevel GetLogLevel(LogEntryMark logEntry)
