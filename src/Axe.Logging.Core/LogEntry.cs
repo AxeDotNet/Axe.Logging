@@ -4,7 +4,7 @@ namespace Axe.Logging.Core
 {
     public class LogEntry
     {
-        public LogEntry(Guid aggregateId, DateTime time, object data, LogLevel level)
+        public LogEntry(Guid aggregateId, DateTime time, object data, AxeLogLevel level)
         {
             AggregateId = aggregateId;
             Time = time;
@@ -15,6 +15,6 @@ namespace Axe.Logging.Core
         public Guid AggregateId { get; set; }
         public DateTime Time { get; }
         public object Data { get; }
-        public LogLevel Level { get; }
+        public AxeLogLevel Level { get; }
     }
 }

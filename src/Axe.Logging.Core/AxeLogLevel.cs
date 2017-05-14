@@ -1,9 +1,9 @@
 ﻿namespace Axe.Logging.Core
 {
-    public enum LogLevel
+    public enum AxeLogLevel
     {
         Info,
-        Warning,
+        Warn,
         Error,
         Fatal
     }

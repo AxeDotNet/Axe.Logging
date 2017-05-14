@@ -50,7 +50,7 @@ namespace Axe.Logging.Core
 
         private static LogEntry CreateDefaultUknownException(Guid aggreateId, Exception exception)
         {
-            return new LogEntry(aggreateId, DateTime.UtcNow, exception, LogLevel.Error);
+            return new LogEntry(aggreateId, DateTime.UtcNow, exception, AxeLogLevel.Error);
         }
 
         private static void FillLogEntries(Exception exception, int maxLevel, List<LogEntry> logEntries, Guid aggreateId, int currentLevel = 1)
@@ -62,7 +62,7 @@ namespace Axe.Logging.Core
             var logEntry = logEntryObject as LogEntryMark;
             if (logEntry != null)
             {
-                LogLevel level = GetLogLevel(logEntry);
+                AxeLogLevel level = GetLogLevel(logEntry);
                 var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Data, level);
 
                 logEntries.Add(entry);
@@ -116,18 +116,18 @@ namespace Axe.Logging.Core
         }
 
 
-        private static LogLevel GetLogLevel(LogEntryMark logEntry)
+        private static AxeLogLevel GetLogLevel(LogEntryMark logEntry)
         {
             switch (logEntry.Level)
             {
                 case Level.DefinedByBusiness:
-                    return LogLevel.Info;
+                    return AxeLogLevel.Info;
                 case Level.IKnowItWillHappen:
-                    return LogLevel.Warning;
+                    return AxeLogLevel.Warn;
                 case Level.Unknown:
-                    return LogLevel.Error;
+                    return AxeLogLevel.Error;
                 default:
-                    return LogLevel.Error;
+                    return AxeLogLevel.Error;
             }
         }
     }
