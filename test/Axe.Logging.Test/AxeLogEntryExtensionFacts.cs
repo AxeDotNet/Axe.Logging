@@ -245,15 +245,13 @@ namespace Axe.Logging.Test
         private static void VerifyLogEntry(LogEntryMark logEntryMarked, LogEntry logEntryResult, LogLevel logLevel = LogLevel.Info)
         {
             Assert.Equal(logEntryMarked.Time, logEntryResult.Time);
-            Assert.Equal(logEntryMarked.Entry, logEntryResult.Entry);
-            Assert.Equal(logEntryMarked.User, logEntryResult.User);
             Assert.Equal(logEntryMarked.Data, logEntryResult.Data);
             Assert.Equal(logLevel, logEntryResult.Level);
         }
 
         static LogEntryMark CreateLogEntry(Level levelMarked = Level.DefinedByBusiness)
         {
-            var logEntry = new LogEntryMark(DateTime.UtcNow, "This is Entry", new { Id = 1 }, new { Country = "China" }, levelMarked);
+            var logEntry = new LogEntryMark(DateTime.UtcNow, new { Country = "China" }, levelMarked);
             return logEntry;
         }
     }

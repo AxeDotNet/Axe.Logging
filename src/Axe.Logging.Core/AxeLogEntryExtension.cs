@@ -50,7 +50,7 @@ namespace Axe.Logging.Core
 
         private static LogEntry CreateDefaultUknownException(Guid aggreateId, Exception exception)
         {
-            return new LogEntry(aggreateId, DateTime.UtcNow, null, null, exception, LogLevel.Error);
+            return new LogEntry(aggreateId, DateTime.UtcNow, exception, LogLevel.Error);
         }
 
         private static void FillLogEntries(Exception exception, int maxLevel, List<LogEntry> logEntries, Guid aggreateId, int currentLevel = 1)
@@ -63,7 +63,7 @@ namespace Axe.Logging.Core
             if (logEntry != null)
             {
                 LogLevel level = GetLogLevel(logEntry);
-                var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Entry, logEntry.User, logEntry.Data, level);
+                var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Data, level);
 
                 logEntries.Add(entry);
             }
