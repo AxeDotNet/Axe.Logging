@@ -178,6 +178,23 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
+        public void should_only_get_log_entries_marked_and_without_default_error_log_entry_given_exception_with_aggregate_exceptions_and_any_ancestor_exception_already_marked()
+        {
+            LogEntryMark logEntry = CreateLogEntry();
+            var notMarkedExceptionOne = new Exception("inner exception one");
+            var notMarkedExceptionTwo = new Exception("inner exception two");
+            var exception = new Exception("", new AggregateException(
+                    "aggregate exceptions",
+                    notMarkedExceptionOne,
+                    notMarkedExceptionTwo))
+                .Mark(logEntry);
+
+            LogEntry retrived = exception.GetLogEntry().Single();
+
+            VerifyLogEntry(logEntry, retrived);
+        }
+
+        [Fact]
         public void should_get_error_level_log_entry_when_get_log_entry_from_exception_given_exception_not_marked_within_maxlevel()
         {
             LogEntryMark logEntry = CreateLogEntry();

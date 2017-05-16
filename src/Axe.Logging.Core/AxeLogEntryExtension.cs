@@ -6,7 +6,7 @@ namespace Axe.Logging.Core
 {
     public static class AxeLogEntryExtension
     {
-        private const string LOG_ENTRY_KEY = "Axe_Logging";
+        const string LOG_ENTRY_KEY = "Axe_Logging";
 
         public static T Mark<T>(this T exception, LogEntryMark logEntry) where T : Exception
         {
@@ -42,18 +42,18 @@ namespace Axe.Logging.Core
             return logEntries.ToArray();
         }
 
-        private static void Validate(Exception exception, LogEntryMark logEntry)
+        static void Validate(Exception exception, LogEntryMark logEntry)
         {
             if (exception != null && logEntry != null) return;
             throw new ArgumentNullException(nameof(exception));
         }
 
-        private static LogEntry CreateDefaultUknownException(Guid aggreateId, Exception exception)
+        static LogEntry CreateDefaultUknownException(Guid aggreateId, Exception exception)
         {
             return new LogEntry(aggreateId, DateTime.UtcNow, exception, AxeLogLevel.Error);
         }
 
-        private static void FillLogEntries(Exception exception, int maxLevel, List<LogEntry> logEntries, Guid aggreateId, int currentLevel = 1)
+        static void FillLogEntries(Exception exception, int maxLevel, List<LogEntry> logEntries, Guid aggreateId, int currentLevel = 1)
         {
             if(exception == null) return;
             if (currentLevel > maxLevel) return; 
@@ -91,32 +91,33 @@ namespace Axe.Logging.Core
             }
         }
 
-        private static bool IsAllBranchesMarkedLogEntry(Exception exception, int maxLevel, bool logEntryFound = false, int currentLevel = 1)
+        static bool IsAllBranchesMarkedLogEntry(Exception exception, int maxLevel, int currentLevel = 1)
         {
-            if (exception == null) { return logEntryFound; }
-            if (currentLevel > maxLevel) { return logEntryFound; }
+            if (exception == null) { return false; }
+            if (currentLevel > maxLevel) { return false; }
+
+            var logEntryObject = exception.Data[LOG_ENTRY_KEY];
+            var logEntry = logEntryObject as LogEntryMark;
+            if (logEntry != null)
+            {
+                return true;
+            }
 
             var aggregateException = exception as AggregateException;
             if (aggregateException != null && aggregateException.InnerExceptions.Any())
             {
-                if (aggregateException.InnerExceptions.Any(ex => !IsAllBranchesMarkedLogEntry(ex, maxLevel, currentLevel: currentLevel + 1)))
+                if (aggregateException.InnerExceptions.Any(ex => !IsAllBranchesMarkedLogEntry(ex, maxLevel, currentLevel + 1)))
                 {
                     return false;
                 }
                 return true;
             }
 
-            var logEntryObject = exception.Data[LOG_ENTRY_KEY];
-            var logEntry = logEntryObject as LogEntryMark;
-            if (logEntry != null)
-            {
-                logEntryFound = true;
-            }
-            return IsAllBranchesMarkedLogEntry(exception.InnerException, maxLevel, logEntryFound, currentLevel + 1);
+            return IsAllBranchesMarkedLogEntry(exception.InnerException, maxLevel, currentLevel + 1);
         }
 
 
-        private static AxeLogLevel GetLogLevel(LogEntryMark logEntry)
+        static AxeLogLevel GetLogLevel(LogEntryMark logEntry)
         {
             switch (logEntry.Level)
             {
