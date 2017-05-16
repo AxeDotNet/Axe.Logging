@@ -4,9 +4,6 @@
     {
         public static AxeLogSetting Default { get;} = new AxeLogSetting();
 
-        public string LoggingBackend { get; set; } = string.Empty;
-
-        public void UseNLogBackend() { LoggingBackend = "NLog"; }
-
+        public ILoggingBackend LoggingBackend { get; set; } = new DummyLoggingBackend();
     }
 }

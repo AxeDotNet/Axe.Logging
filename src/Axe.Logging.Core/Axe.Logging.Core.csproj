@@ -48,14 +48,18 @@
     <Compile Include="AxeLogEntryExtension.cs" />
     <Compile Include="AxeLogManger.cs" />
     <Compile Include="AxeLogSetting.cs" />
+    <Compile Include="AxeLogSettingExtension.cs" />
     <Compile Include="DummyLogger.cs" />
+    <Compile Include="DummyLoggingBackend.cs" />
     <Compile Include="IAxeLogger.cs" />
+    <Compile Include="ILoggingBackend.cs" />
     <Compile Include="Level.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="LogEntryMark.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="AxeLogLevel.cs" />
     <Compile Include="NLogLogger.cs" />
+    <Compile Include="NLogLoggingBackend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,14 +8,7 @@ namespace Axe.Logging.Core
 
         public static IAxeLogger GetLogger(string name, AxeLogSetting axeLogSetting)
         {
-            var logSetting = axeLogSetting ?? AxeLogSetting.Default;
-            switch (logSetting.LoggingBackend)
-            {
-                case "NLog":
-                    return new NLogLogger(name);
-                default:
-                    return new DummyLogger(name);
-            }
+            return axeLogSetting.LoggingBackend.GetLogger(name);        
         }
 
         public static IAxeLogger GetCurrentClassLogger()
