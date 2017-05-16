@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="AxeLogEntryExtensionFacts.cs" />
     <Compile Include="AxeLoggerFacts.cs" />
+    <Compile Include="AxeLogManagerFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
