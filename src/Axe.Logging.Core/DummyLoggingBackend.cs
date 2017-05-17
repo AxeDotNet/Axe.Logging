@@ -1,6 +1,6 @@
 ﻿namespace Axe.Logging.Core
 {
-    internal class DummyLoggingBackend : ILoggingBackend
+    public class DummyLoggingBackend : ILoggingBackend
     {
         public IAxeLogger GetLogger(string name)
         {

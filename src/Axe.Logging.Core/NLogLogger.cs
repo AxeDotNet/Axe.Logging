@@ -6,7 +6,7 @@ namespace Axe.Logging.Core
     {
         readonly Logger logger;
 
-        public NLogLogger(string  name) { this.logger = LogManager.GetLogger(name); }
+        public NLogLogger(string  name) { logger = LogManager.GetLogger(name); }
 
         public override void RecordLogEntry(LogEntry logEntry)
         {
@@ -21,7 +21,7 @@ namespace Axe.Logging.Core
             logger.Log(nlogLevel, logInfo);
         }
 
-        private static LogLevel GetNlogLevel(AxeLogLevel logEntryLevel)
+        static LogLevel GetNlogLevel(AxeLogLevel logEntryLevel)
         {
             switch (logEntryLevel)
             {
