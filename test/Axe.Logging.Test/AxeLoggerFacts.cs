@@ -27,22 +27,26 @@ namespace Axe.Logging.Test
         {
             FakeAxeLogger fakeAxeLogger = new FakeAxeLogger();
 
-            var dataOnParrent = new { Name = "logEntryOnParent" };
-            var dataOnInner = new { Name = "logEntryOnInner" };
-            var innerException = new Exception("inner").MarkAsWarn(dataOnInner);
-            var parentException = new Exception("parent", innerException).MarkAsInfo(dataOnParrent);
+            var dataOnParrentException = new { Name = "logEntryOnParent" };
+            var dataOnInnerException = new { Name = "logEntryOnInner" };
+            var innerException = new Exception("inner").MarkAsWarn(dataOnInnerException);
+            var parentException = new Exception("parent", innerException).MarkAsInfo(dataOnParrentException);
 
             fakeAxeLogger.Log(parentException);
 
-            Assert.Equal(2, fakeAxeLogger.Logs.Count);
+            var logs = fakeAxeLogger.Logs;
+            var logFromParentException = logs.Single(e => e.Level == AxeLogLevel.Info);
+            var logFromInnerException = logs.Single(e => e.Level == AxeLogLevel.Warn);
 
-            Assert.Equal(AxeLogLevel.Info, fakeAxeLogger.Logs[0].Level);
-            Assert.Equal(DateTime.UtcNow.ToString(), fakeAxeLogger.Logs[0].Time.ToString());
-            Assert.Equal(dataOnParrent, fakeAxeLogger.Logs[0].Data);
+            Assert.Equal(2, logs.Count);
 
-            Assert.Equal(AxeLogLevel.Warn, fakeAxeLogger.Logs[1].Level);
-            Assert.Equal(DateTime.UtcNow.ToString(), fakeAxeLogger.Logs[1].Time.ToString());
-            Assert.Equal(dataOnInner, fakeAxeLogger.Logs[1].Data);
+            Assert.Equal(AxeLogLevel.Info, logFromParentException.Level);
+            Assert.Equal(DateTime.UtcNow.ToString(), logFromParentException.Time.ToString());
+            Assert.Equal(dataOnParrentException, logFromParentException.Data);
+
+            Assert.Equal(AxeLogLevel.Warn, logFromInnerException.Level);
+            Assert.Equal(DateTime.UtcNow.ToString(), logFromInnerException.Time.ToString());
+            Assert.Equal(dataOnInnerException, logFromInnerException.Data);
         }
 
         [Fact]
