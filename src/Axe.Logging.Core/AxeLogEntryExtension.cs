@@ -8,8 +8,10 @@ namespace Axe.Logging.Core
     {
         const string LOG_ENTRY_KEY = "Axe_Logging";
 
-        public static T Mark<T>(this T exception, LogEntryMark logEntry) where T : Exception
+        public static T Mark<T>(this T exception, AxeLogLevel axeLogLevel, object data) where T : Exception
         {
+            var logEntry = new LogEntryMark(DateTime.UtcNow, data, axeLogLevel);
+
             Validate(exception, logEntry);
 
             if (exception.Data[LOG_ENTRY_KEY] != null)
@@ -44,7 +46,7 @@ namespace Axe.Logging.Core
 
         static void Validate(Exception exception, LogEntryMark logEntry)
         {
-            if (exception != null && logEntry != null) return;
+            if (exception != null) return;
             throw new ArgumentNullException(nameof(exception));
         }
 

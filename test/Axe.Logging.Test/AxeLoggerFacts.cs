@@ -33,8 +33,8 @@ namespace Axe.Logging.Test
             var dataOnInner = new { Name = "logEntryOnInner" };
             var timeOnInner = DateTime.UtcNow;
             var logEntryOnInner = new LogEntryMark(timeOnInner, dataOnInner, AxeLogLevel.Warn);
-            var innerException = new Exception("inner").Mark(logEntryOnInner);
-            var parentException = new Exception("parent", innerException).Mark(logEntryOnParent);
+            var innerException = new Exception("inner").Mark(logEntryOnInner.Level, logEntryOnInner.Data);
+            var parentException = new Exception("parent", innerException).Mark(logEntryOnParent.Level, logEntryOnParent.Data);
 
             fakeAxeLogger.Log(parentException);
 
