@@ -22,6 +22,17 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
+        public void should_get_info_log_entry_from_exception_marked_as_info()
+        {
+            object logEntryData = CreateLogEntryData();
+            Exception exception = new Exception().MarkAsInfo(logEntryData);
+
+            LogEntry logEntryResult = exception.GetLogEntry().Single();
+
+            VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Info);
+        }
+
+        [Fact]
         public void should_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
         {
             Exception exception = null;
