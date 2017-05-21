@@ -13,16 +13,6 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
-        public void should_return_nlog_logger_when_use_nlog_backend()
-        {
-            AxeLogSetting axeLogSetting = new AxeLogSetting();
-            axeLogSetting.UseNLogBackend();
-            var axeLogger = AxeLogManger.GetLogger("axeLogger", axeLogSetting);
-
-            Assert.Equal(typeof(NLogLogger).Name, axeLogger.GetType().Name);
-        }
-
-        [Fact]
         public void should_return_logger_for_current_class_when_get_current_class_logger()
         {
            var currentClassLogger = AxeLogManger.GetCurrentClassLogger();

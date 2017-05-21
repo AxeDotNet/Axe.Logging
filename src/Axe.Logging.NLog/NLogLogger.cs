@@ -1,12 +1,13 @@
-﻿using NLog;
+﻿using Axe.Logging.Core;
+using NLog;
 
-namespace Axe.Logging.Core
+namespace Axe.Logging.NLog
 {
     public class NLogLogger : LoggerBase
     {
         readonly Logger logger;
 
-        public NLogLogger(string  name) { logger = LogManager.GetLogger(name); }
+        public NLogLogger(string name) { logger = LogManager.GetLogger(name); }
 
         public override void RecordLogEntry(LogEntry logEntry)
         {

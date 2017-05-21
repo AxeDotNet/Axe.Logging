@@ -1,4 +1,6 @@
-﻿namespace Axe.Logging.Core
+﻿using Axe.Logging.Core;
+
+namespace Axe.Logging.NLog
 {
     public class NLogLoggingBackend : ILoggingBackend
     {
