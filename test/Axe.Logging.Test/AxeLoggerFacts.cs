@@ -28,24 +28,20 @@ namespace Axe.Logging.Test
             FakeAxeLogger fakeAxeLogger = new FakeAxeLogger();
 
             var dataOnParrent = new { Name = "logEntryOnParent" };
-            var timeOnParrent = DateTime.UtcNow.AddMinutes(-1);
-            var logEntryOnParent = new LogEntryMark(timeOnParrent, dataOnParrent, AxeLogLevel.Info );
             var dataOnInner = new { Name = "logEntryOnInner" };
-            var timeOnInner = DateTime.UtcNow;
-            var logEntryOnInner = new LogEntryMark(timeOnInner, dataOnInner, AxeLogLevel.Warn);
-            var innerException = new Exception("inner").Mark(logEntryOnInner.Level, logEntryOnInner.Data);
-            var parentException = new Exception("parent", innerException).Mark(logEntryOnParent.Level, logEntryOnParent.Data);
+            var innerException = new Exception("inner").MarkAsWarn(dataOnInner);
+            var parentException = new Exception("parent", innerException).MarkAsInfo(dataOnParrent);
 
             fakeAxeLogger.Log(parentException);
 
             Assert.Equal(2, fakeAxeLogger.Logs.Count);
 
             Assert.Equal(AxeLogLevel.Info, fakeAxeLogger.Logs[0].Level);
-            Assert.Equal(timeOnParrent.Date, fakeAxeLogger.Logs[0].Time.Date);
+            Assert.Equal(DateTime.UtcNow.ToString(), fakeAxeLogger.Logs[0].Time.ToString());
             Assert.Equal(dataOnParrent, fakeAxeLogger.Logs[0].Data);
 
             Assert.Equal(AxeLogLevel.Warn, fakeAxeLogger.Logs[1].Level);
-            Assert.Equal(timeOnInner.Date, fakeAxeLogger.Logs[1].Time.Date);
+            Assert.Equal(DateTime.UtcNow.ToString(), fakeAxeLogger.Logs[1].Time.ToString());
             Assert.Equal(dataOnInner, fakeAxeLogger.Logs[1].Data);
         }
 

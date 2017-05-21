@@ -8,10 +8,6 @@ namespace Axe.Logging.Core
     {
         const string LOG_ENTRY_KEY = "Axe_Logging";
 
-        public static T Mark<T>(this T exception, AxeLogLevel axeLogLevel, object data) where T : Exception {
-            return MarkLogEntryForException(exception, axeLogLevel, data);
-        }
-
         public static T MarkAsInfo<T>(this T exception, object data) where T : Exception
         {
             return MarkLogEntryForException(exception, AxeLogLevel.Info, data);
