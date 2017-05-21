@@ -33,6 +33,17 @@ namespace Axe.Logging.Test
         }
 
         [Fact]
+        public void should_get_warn_log_entry_from_exception_marked_as_warn()
+        {
+            object logEntryData = CreateLogEntryData();
+            Exception exception = new Exception().MarkAsWarn(logEntryData);
+
+            LogEntry logEntryResult = exception.GetLogEntry().Single();
+
+            VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Warn);
+        }
+
+        [Fact]
         public void should_throw_argumet_null_exception_when_mark_exception_given_exception_is_null()
         {
             Exception exception = null;

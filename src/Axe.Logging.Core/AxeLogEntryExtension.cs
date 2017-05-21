@@ -17,6 +17,11 @@ namespace Axe.Logging.Core
             return MarkLogEntryForException(exception, AxeLogLevel.Info, data);
         }
 
+        public static T MarkAsWarn<T>(this T exception, object data) where T : Exception
+        {
+            return MarkLogEntryForException(exception, AxeLogLevel.Warn, data);
+        }
+
         static T MarkLogEntryForException<T>(T exception, AxeLogLevel axeLogLevel, object data) where T : Exception
         {
             var logEntry = new LogEntryMark(DateTime.UtcNow, data, axeLogLevel);
