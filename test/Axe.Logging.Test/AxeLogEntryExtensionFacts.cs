@@ -8,12 +8,12 @@ namespace Axe.Logging.Test
     public class AxeLogEntryExtensionFacts
     {
         [Theory]
-        [InlineData(Level.DefinedByBusiness, AxeLogLevel.Info)]
-        [InlineData(Level.IKnowItWillHappen, AxeLogLevel.Warn)]
-        [InlineData(Level.Unknown, AxeLogLevel.Error)]
-        public void should_get_log_entry_from_any_marked_exception(Level levelMarked, AxeLogLevel loglevel)
+        [InlineData(AxeLogLevel.Info)]
+        [InlineData(AxeLogLevel.Warn)]
+        [InlineData(AxeLogLevel.Error)]
+        public void should_get_log_entry_from_any_marked_exception(AxeLogLevel loglevel)
         {
-            LogEntryMark logEntry = CreateLogEntry(levelMarked);
+            LogEntryMark logEntry = CreateLogEntry(loglevel);
             Exception exception = new Exception().Mark(logEntry);
 
             LogEntry logEntryResult = exception.GetLogEntry().Single();
@@ -104,8 +104,8 @@ namespace Axe.Logging.Test
         [Fact]
         public void should_get_all_log_entries_with_same_id_for_multiple_marked_aggregated_exceptions()
         {
-            LogEntryMark logEntry1 = CreateLogEntry(Level.DefinedByBusiness);
-            LogEntryMark logEntry2 = CreateLogEntry(Level.IKnowItWillHappen);
+            LogEntryMark logEntry1 = CreateLogEntry(AxeLogLevel.Info);
+            LogEntryMark logEntry2 = CreateLogEntry(AxeLogLevel.Warn);
 
             Exception innerExceptionMarkedOne = new Exception("inner exception one").Mark(logEntry1);
             Exception innerExceptionMarkedTwo = new Exception("inner exception two").Mark(logEntry2);
@@ -229,9 +229,9 @@ namespace Axe.Logging.Test
         [Fact]
         public void should_get_log_entries_for_exception_contains_aggregate_exception()
         {
-            LogEntryMark logEntry41 = CreateLogEntry(Level.DefinedByBusiness);
-            LogEntryMark logEntry52 = CreateLogEntry(Level.IKnowItWillHappen);
-            LogEntryMark logEntry2 = CreateLogEntry(Level.Unknown);
+            LogEntryMark logEntry41 = CreateLogEntry(AxeLogLevel.Info);
+            LogEntryMark logEntry52 = CreateLogEntry(AxeLogLevel.Warn);
+            LogEntryMark logEntry2 = CreateLogEntry(AxeLogLevel.Error);
 
             var exception = new Exception(
                 "level 1",
@@ -266,7 +266,7 @@ namespace Axe.Logging.Test
             Assert.Equal(axeLogLevel, logEntryResult.Level);
         }
 
-        static LogEntryMark CreateLogEntry(Level levelMarked = Level.DefinedByBusiness)
+        static LogEntryMark CreateLogEntry(AxeLogLevel levelMarked = AxeLogLevel.Info)
         {
             var logEntry = new LogEntryMark(DateTime.UtcNow, new { Country = "China" }, levelMarked);
             return logEntry;

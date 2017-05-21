@@ -62,8 +62,7 @@ namespace Axe.Logging.Core
             var logEntry = logEntryObject as LogEntryMark;
             if (logEntry != null)
             {
-                AxeLogLevel level = GetLogLevel(logEntry);
-                var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Data, level);
+                var entry = new LogEntry(aggreateId, logEntry.Time, logEntry.Data, logEntry.Level);
 
                 logEntries.Add(entry);
             }
@@ -116,20 +115,5 @@ namespace Axe.Logging.Core
             return IsAllBranchesMarkedLogEntry(exception.InnerException, maxLevel, currentLevel + 1);
         }
 
-
-        static AxeLogLevel GetLogLevel(LogEntryMark logEntry)
-        {
-            switch (logEntry.Level)
-            {
-                case Level.DefinedByBusiness:
-                    return AxeLogLevel.Info;
-                case Level.IKnowItWillHappen:
-                    return AxeLogLevel.Warn;
-                case Level.Unknown:
-                    return AxeLogLevel.Error;
-                default:
-                    return AxeLogLevel.Error;
-            }
-        }
     }
 }

@@ -29,10 +29,10 @@ namespace Axe.Logging.Test
 
             var dataOnParrent = new { Name = "logEntryOnParent" };
             var timeOnParrent = DateTime.UtcNow.AddMinutes(-1);
-            var logEntryOnParent = new LogEntryMark(timeOnParrent, dataOnParrent, Level.DefinedByBusiness );
+            var logEntryOnParent = new LogEntryMark(timeOnParrent, dataOnParrent, AxeLogLevel.Info );
             var dataOnInner = new { Name = "logEntryOnInner" };
             var timeOnInner = DateTime.UtcNow;
-            var logEntryOnInner = new LogEntryMark(timeOnInner, dataOnInner, Level.IKnowItWillHappen);
+            var logEntryOnInner = new LogEntryMark(timeOnInner, dataOnInner, AxeLogLevel.Warn);
             var innerException = new Exception("inner").Mark(logEntryOnInner);
             var parentException = new Exception("parent", innerException).Mark(logEntryOnParent);
 
