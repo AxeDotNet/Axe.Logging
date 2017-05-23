@@ -9,9 +9,9 @@ namespace Axe.Logging.NLog
 
         public NLogLogger(string name) { logger = LogManager.GetLogger(name); }
 
-        protected override void WriteLog(AxeLogLevel axeLogLevel, string logMessage)
+        protected override void WriteLog(AxeLogLevel level, string logMessage)
         {
-            switch (axeLogLevel)
+            switch (level)
             {
                 case AxeLogLevel.Info:
                     logger.Info(logMessage);

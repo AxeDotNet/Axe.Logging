@@ -39,6 +39,6 @@ namespace Axe.Logging.Core
             WriteLog(entry.Level, JsonConvert.SerializeObject(entry, settings));
         }
 
-        protected abstract void WriteLog(AxeLogLevel axeLogLevel, string logMessage);
+        protected abstract void WriteLog(AxeLogLevel level, string logMessage);
     }
 }

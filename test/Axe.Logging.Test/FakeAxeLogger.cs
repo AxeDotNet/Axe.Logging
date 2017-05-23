@@ -8,9 +8,10 @@ namespace Axe.Logging.Test
     {
         public List<LogEntry> Logs { get; } = new List<LogEntry>();
         
-        protected override void WriteLog(AxeLogLevel axeLogLevel, string logMessage)
+        protected override void WriteLog(AxeLogLevel level, string logMessage)
         {
-            Logs.Add(JsonConvert.DeserializeObject<LogEntry>(logMessage));
+            var entry = JsonConvert.DeserializeObject<LogEntry>(logMessage);
+            Logs.Add(new LogEntry(entry.AggregateId, entry.Time, entry.Data, level));
         }
     }
 }

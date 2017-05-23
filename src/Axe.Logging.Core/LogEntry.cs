@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Axe.Logging.Core
 {
@@ -15,6 +16,8 @@ namespace Axe.Logging.Core
         public Guid AggregateId { get; set; }
         public DateTime Time { get; }
         public object Data { get; }
+
+        [JsonIgnore]
         public AxeLogLevel Level { get; }
     }
 }
