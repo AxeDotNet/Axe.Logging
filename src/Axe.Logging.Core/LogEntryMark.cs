@@ -3,7 +3,7 @@
 namespace Axe.Logging.Core
 {
     [Serializable]
-    public class LogEntryMark
+    class LogEntryMark
     {
         public LogEntryMark(DateTime time, object data, AxeLogLevel level)
         {

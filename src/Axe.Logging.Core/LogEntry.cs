@@ -2,7 +2,7 @@
 
 namespace Axe.Logging.Core
 {
-    public class LogEntry
+    class LogEntry
     {
         public LogEntry(Guid aggregateId, DateTime time, object data, AxeLogLevel level)
         {

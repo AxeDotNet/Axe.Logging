@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Axe.Logging.Core
 {
-    public static class AxeLogEntryExtension
+    public static class ExceptionLogExtension
     {
         const string LOG_ENTRY_KEY = "Axe_Logging";
 
@@ -23,22 +23,7 @@ namespace Axe.Logging.Core
             return MarkLogEntryForException(exception, AxeLogLevel.Error, data);
         }
 
-        static T MarkLogEntryForException<T>(T exception, AxeLogLevel axeLogLevel, object data) where T : Exception
-        {
-            var logEntry = new LogEntryMark(DateTime.UtcNow, data, axeLogLevel);
-
-            Validate(exception, logEntry);
-
-            if (exception.Data[LOG_ENTRY_KEY] != null)
-            {
-                exception.Data.Remove(LOG_ENTRY_KEY);
-            }
-
-            exception.Data.Add(LOG_ENTRY_KEY, logEntry);
-            return exception;
-        }
-
-        public static LogEntry[] GetLogEntry(this Exception exception, int maxLevel = 10)
+        internal static LogEntry[] GetLogEntries(this Exception exception, int maxLevel = 10)
         {
             var logEntries = new List<LogEntry>();
             if (exception == null)
@@ -59,10 +44,22 @@ namespace Axe.Logging.Core
             return logEntries.ToArray();
         }
 
-        static void Validate(Exception exception, LogEntryMark logEntry)
+        static T MarkLogEntryForException<T>(T exception, AxeLogLevel axeLogLevel, object data) where T : Exception
         {
-            if (exception != null) return;
-            throw new ArgumentNullException(nameof(exception));
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
+            var logEntry = new LogEntryMark(DateTime.UtcNow, data, axeLogLevel);
+
+            if (exception.Data[LOG_ENTRY_KEY] != null)
+            {
+                exception.Data.Remove(LOG_ENTRY_KEY);
+            }
+
+            exception.Data.Add(LOG_ENTRY_KEY, logEntry);
+            return exception;
         }
 
         static LogEntry CreateDefaultUknownException(Guid aggreateId, Exception exception)
@@ -131,6 +128,5 @@ namespace Axe.Logging.Core
 
             return IsAllBranchesMarkedLogEntry(exception.InnerException, maxLevel, currentLevel + 1);
         }
-
     }
 }

@@ -4,7 +4,7 @@ namespace Axe.Logging.Core
 {
     public interface IAxeLogger
     {
-        void Log(AxeLogLevel axeLogLevel, object data);
+        void Log(AxeLogLevel level, object data);
 
         void Log(Exception exception);
 

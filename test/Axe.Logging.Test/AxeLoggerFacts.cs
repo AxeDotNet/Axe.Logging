@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Axe.Logging.Core;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Axe.Logging.Test
@@ -19,7 +19,7 @@ namespace Axe.Logging.Test
 
             Assert.Equal(AxeLogLevel.Info, logEntry.Level);
             Assert.Equal(DateTime.UtcNow.Date, logEntry.Time.Date);
-            Assert.Equal(data, logEntry.Data);
+            Assert.Equal(data.Data, ((JObject)logEntry.Data)["data"].Value<string>());
         }
 
         [Fact]
@@ -42,11 +42,9 @@ namespace Axe.Logging.Test
 
             Assert.Equal(AxeLogLevel.Info, logFromParentException.Level);
             Assert.Equal(DateTime.UtcNow.ToString(), logFromParentException.Time.ToString());
-            Assert.Equal(dataOnParrentException, logFromParentException.Data);
 
             Assert.Equal(AxeLogLevel.Warn, logFromInnerException.Level);
             Assert.Equal(DateTime.UtcNow.ToString(), logFromInnerException.Time.ToString());
-            Assert.Equal(dataOnInnerException, logFromInnerException.Data);
         }
 
         [Fact]
@@ -59,7 +57,7 @@ namespace Axe.Logging.Test
             var logEntry = fakeAxeLogger.Logs.Single();
 
             Assert.Equal(AxeLogLevel.Info, logEntry.Level);
-            Assert.Equal(data, logEntry.Data);
+            Assert.Equal(data.Data, ((JObject)logEntry.Data)["data"].Value<string>());
         }
 
         [Fact]
@@ -72,7 +70,7 @@ namespace Axe.Logging.Test
             var logEntry = fakeAxeLogger.Logs.Single();
 
             Assert.Equal(AxeLogLevel.Warn, logEntry.Level);
-            Assert.Equal(data, logEntry.Data);
+            Assert.Equal(data.Data, ((JObject)logEntry.Data)["data"].Value<string>());
         }
 
         [Fact]
@@ -85,17 +83,7 @@ namespace Axe.Logging.Test
             var logEntry = fakeAxeLogger.Logs.Single();
 
             Assert.Equal(AxeLogLevel.Error, logEntry.Level);
-            Assert.Equal(data, logEntry.Data);
-        }
-    }
-
-    public class FakeAxeLogger : LoggerBase
-    {
-        public List<LogEntry> Logs { get; } = new List<LogEntry>();
-
-        public override void RecordLogEntry(LogEntry logEntry)
-        {
-            Logs.Add(logEntry);      
+            Assert.Equal(data.Data, ((JObject)logEntry.Data)["data"].Value<string>());
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Axe.Logging.NLog.Test
             axeLogSetting.UseNLogBackend();
             var axeLogger = AxeLogManger.GetLogger("axeLogger", axeLogSetting);
 
-            Assert.Equal(typeof(NLogLogger).Name, axeLogger.GetType().Name);
+            Assert.Equal("NLogLogger", axeLogger.GetType().Name);
         }
     }
 }

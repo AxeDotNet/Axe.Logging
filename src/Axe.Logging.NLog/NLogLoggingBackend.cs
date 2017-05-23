@@ -2,7 +2,7 @@
 
 namespace Axe.Logging.NLog
 {
-    public class NLogLoggingBackend : ILoggingBackend
+    class NLogLoggingBackend : ILoggingBackend
     {
         public IAxeLogger GetLogger(string name)
         {

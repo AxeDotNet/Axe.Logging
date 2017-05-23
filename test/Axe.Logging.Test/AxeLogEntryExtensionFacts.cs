@@ -13,7 +13,7 @@ namespace Axe.Logging.Test
             object logEntryData = CreateLogEntryData();
             Exception exception = new Exception().MarkAsInfo(logEntryData);
 
-            LogEntry logEntryResult = exception.GetLogEntry().Single();
+            LogEntry logEntryResult = exception.GetLogEntries().Single();
 
             VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Info);
         }
@@ -24,7 +24,7 @@ namespace Axe.Logging.Test
             object logEntryData = CreateLogEntryData();
             Exception exception = new Exception().MarkAsWarn(logEntryData);
 
-            LogEntry logEntryResult = exception.GetLogEntry().Single();
+            LogEntry logEntryResult = exception.GetLogEntries().Single();
 
             VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Warn);
         }
@@ -35,7 +35,7 @@ namespace Axe.Logging.Test
             object logEntryData = CreateLogEntryData();
             Exception exception = new Exception().MarkAsError(logEntryData);
 
-            LogEntry logEntryResult = exception.GetLogEntry().Single();
+            LogEntry logEntryResult = exception.GetLogEntries().Single();
 
             VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Error);
         }
@@ -58,7 +58,7 @@ namespace Axe.Logging.Test
             Exception exception = new Exception().MarkAsInfo(oldLogEntryData);
             exception.MarkAsError(newLogEntryData);
 
-            VerifyLogEntry(exception.GetLogEntry().Single(), newLogEntryData, AxeLogLevel.Error);
+            VerifyLogEntry(exception.GetLogEntries().Single(), newLogEntryData, AxeLogLevel.Error);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Axe.Logging.Test
         {
             Exception exception = null;
 
-            Assert.Empty(exception.GetLogEntry());
+            Assert.Empty(exception.GetLogEntries());
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Axe.Logging.Test
         {
             var exception = new Exception();
 
-            LogEntry logEntry = exception.GetLogEntry().Single();
+            LogEntry logEntry = exception.GetLogEntries().Single();
 
             Assert.Equal(DateTime.UtcNow, logEntry.Time);
             Assert.Equal(exception, logEntry.Data);
@@ -88,7 +88,7 @@ namespace Axe.Logging.Test
             Exception innerExceptionWithLogEntry = new Exception().MarkAsInfo(logEntryData);
             var exception = new Exception("parent", innerExceptionWithLogEntry);
 
-            LogEntry logEntryResult = exception.GetLogEntry().Single();
+            LogEntry logEntryResult = exception.GetLogEntries().Single();
 
             VerifyLogEntry(logEntryResult, logEntryData, AxeLogLevel.Info);
         }
@@ -102,7 +102,7 @@ namespace Axe.Logging.Test
             Exception innerException = new Exception("inner").MarkAsInfo(logEntryOnInnerData);
             Exception parentException = new Exception("parent", innerException).MarkAsInfo(logEntryOnParentData);
 
-            LogEntry[] logEntries = parentException.GetLogEntry();
+            LogEntry[] logEntries = parentException.GetLogEntries();
 
             Assert.Equal(2, logEntries.Length);
 
@@ -125,7 +125,7 @@ namespace Axe.Logging.Test
                 innerExceptionMarkedOne, 
                 innerExceptionMarkedTwo);
 
-            LogEntry[] logEntries = exception.GetLogEntry();
+            LogEntry[] logEntries = exception.GetLogEntries();
             var innerExceptionMarkedOneResult = logEntries.Single(l => l.Level == AxeLogLevel.Info);
             var innerExceptionMarkedTwoResult = logEntries.Single(l => l.Level == AxeLogLevel.Warn);
 
@@ -147,7 +147,7 @@ namespace Axe.Logging.Test
                 notMarkedExceptionOne, 
                 notMarkedExceptionTwo);
 
-            LogEntry logEntry = exception.GetLogEntry().Single();
+            LogEntry logEntry = exception.GetLogEntries().Single();
 
             Assert.Equal(AxeLogLevel.Error, logEntry.Level);
             Assert.Equal(exception, logEntry.Data);
@@ -161,7 +161,7 @@ namespace Axe.Logging.Test
             var markedException = new Exception().MarkAsInfo(logEntryData);
             var exception = new AggregateException("aggregate exceptions", notMarkedException, markedException);
 
-            LogEntry[] logEntries = exception.GetLogEntry();
+            LogEntry[] logEntries = exception.GetLogEntries();
 
             Assert.Equal(2, logEntries.Length);
 
@@ -179,7 +179,7 @@ namespace Axe.Logging.Test
         {
             var exception = new AggregateException();
 
-            LogEntry[] logEntries = exception.GetLogEntry();
+            LogEntry[] logEntries = exception.GetLogEntries();
 
             Assert.Equal(1, logEntries.Length);
             LogEntry retrivedLogEntry = logEntries.Single();
@@ -200,7 +200,7 @@ namespace Axe.Logging.Test
                     notMarkedExceptionTwo))
                 .MarkAsInfo(logEntryData);
 
-            LogEntry retrived = exception.GetLogEntry().Single();
+            LogEntry retrived = exception.GetLogEntries().Single();
 
             VerifyLogEntry(retrived, logEntryData);
         }
@@ -213,7 +213,7 @@ namespace Axe.Logging.Test
                 "exception level 1", 
                 new Exception("exception level 2").MarkAsInfo(logEntryData));
 
-            LogEntry retrived = exception.GetLogEntry(1).Single();
+            LogEntry retrived = exception.GetLogEntries(1).Single();
 
             Assert.Equal(AxeLogLevel.Error, retrived.Level);
             Assert.Equal(exception, retrived.Data);
@@ -232,7 +232,7 @@ namespace Axe.Logging.Test
                         "level 3",
                         new Exception("level 4").MarkAsInfo(logEntryData))));
 
-            LogEntry retrived = aggregateException.GetLogEntry(4).Single();
+            LogEntry retrived = aggregateException.GetLogEntries(4).Single();
             
             VerifyLogEntry(retrived, logEntryData);
         }
@@ -256,7 +256,7 @@ namespace Axe.Logging.Test
                                 new Exception("level 5.2").MarkAsWarn(logEntry52Data))))
                     .MarkAsError(logEntry2Data));
 
-            LogEntry[] logEntries = exception.GetLogEntry(6);
+            LogEntry[] logEntries = exception.GetLogEntries(6);
             var logEntry41Result = logEntries.Single(e => e.Level == AxeLogLevel.Info);
             var logEntry52Result = logEntries.Single(e => e.Level == AxeLogLevel.Warn);
             var logEntry2Result = logEntries.Single(e => e.Level == AxeLogLevel.Error);

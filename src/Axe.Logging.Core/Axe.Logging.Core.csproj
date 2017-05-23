@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.6\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -41,19 +44,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AxeLogEntryExtension.cs" />
+    <Compile Include="ExceptionLogExtension.cs" />
     <Compile Include="AxeLogManger.cs" />
     <Compile Include="AxeLogSetting.cs" />
-    <Compile Include="DummyLogger.cs" />
-    <Compile Include="DummyLoggingBackend.cs" />
+    <Compile Include="NullValues\DummyLogger.cs" />
+    <Compile Include="NullValues\DummyLoggingBackend.cs" />
     <Compile Include="IAxeLogger.cs" />
     <Compile Include="ILoggingBackend.cs" />
-    <Compile Include="Level.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="LogEntryMark.cs" />
     <Compile Include="LoggerBase.cs" />
     <Compile Include="AxeLogLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

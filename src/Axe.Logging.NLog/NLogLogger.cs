@@ -3,37 +3,25 @@ using NLog;
 
 namespace Axe.Logging.NLog
 {
-    public class NLogLogger : LoggerBase
+    class NLogLogger : LoggerBase
     {
         readonly Logger logger;
 
         public NLogLogger(string name) { logger = LogManager.GetLogger(name); }
 
-        public override void RecordLogEntry(LogEntry logEntry)
+        protected override void WriteLog(AxeLogLevel axeLogLevel, string logMessage)
         {
-            var nlogLevel = GetNlogLevel(logEntry.Level);
-            var logInfo = new
-            {
-                id = logEntry.AggregateId,
-                time = logEntry.Time,
-                data = logEntry.Data
-            };
-
-            logger.Log(nlogLevel, logInfo);
-        }
-
-        static LogLevel GetNlogLevel(AxeLogLevel logEntryLevel)
-        {
-            switch (logEntryLevel)
+            switch (axeLogLevel)
             {
                 case AxeLogLevel.Info:
-                    return LogLevel.Info;
+                    logger.Info(logMessage);
+                    break;
                 case AxeLogLevel.Warn:
-                    return LogLevel.Warn;
-                case AxeLogLevel.Fatal:
-                    return LogLevel.Fatal;
+                    logger.Warn(logMessage);
+                    break;
                 default:
-                    return LogLevel.Error;
+                    logger.Error(logMessage);
+                    break;
             }
         }
     }
